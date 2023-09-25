@@ -1,0 +1,11 @@
+{
+    "database":{
+        "database": "dev_db",
+        "username": "dev",
+        "password": "dev123",
+        "port" : 5500,
+        "type": "postgres",
+        "logging": true,
+        "host": "localhost"
+    }
+}

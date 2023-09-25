@@ -1,0 +1,11 @@
+{
+  "database":{
+      "database": "test_db",
+      "username": "test",
+      "password": "test",
+      "port" : 5501,
+      "type": "postgres",
+      "logging": false,
+      "host": "localhost"
+  }
+}
