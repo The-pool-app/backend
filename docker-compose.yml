@@ -1,7 +1,7 @@
 version: '3.1'
 
 services:
-  dev_database:
+  dev_db:
     image: postgres:15.0
     container_name: dev_database
     environment:
@@ -13,7 +13,7 @@ services:
     volumes:
       - postgresDB_dev:/var/lib/postgresql/data
 
-  test_database:
+  test_db:
     image: postgres:15.0
     container_name: test_database
     environment:
