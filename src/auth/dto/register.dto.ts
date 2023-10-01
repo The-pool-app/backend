@@ -1,45 +1,42 @@
-import {
-  IsDate,
-  IsEmail,
-  IsEnum,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
 
-enum IGender {
-  'Female',
-  'Male',
-}
+// enum IGender {
+//   'Female',
+//   'Male',
+// }
 
 export class RegisterDto {
   @IsNotEmpty()
-  @IsString()
-  firstName: string;
-  @IsNotEmpty()
-  @IsString()
-  lastName: string;
+  pin: string;
 
   @IsNotEmpty()
   @IsEmail()
-  workEmail: string;
+  email: string;
 
-  @IsNotEmpty()
-  @IsString()
-  jobTitle: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // firstName?: string;
 
-  @IsNotEmpty()
-  @IsPhoneNumber()
-  phoneNumber: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // lastName?: string;
 
-  @IsNotEmpty()
-  @IsEnum(IGender)
-  sex: string;
+  // @IsNotEmpty()
+  // @IsString()
+  // jobTitle?: string;
 
-  @IsDate()
-  @IsNotEmpty()
-  dateOfBirth: string;
+  // @IsNotEmpty()
+  // @IsPhoneNumber()
+  // phoneNumber?: string;
 
-  @IsNotEmpty()
-  meansOfIdentification: string;
+  // @IsNotEmpty()
+  // @IsEnum(IGender)
+  // sex?: string;
+
+  // @IsDate()
+  // @IsNotEmpty()
+  // dateOfBirth?: string;
+
+  // @IsNotEmpty()
+  // meansOfIdentification?: string;
 }
