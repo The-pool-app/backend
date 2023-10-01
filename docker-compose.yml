@@ -10,6 +10,7 @@ services:
     container_name: server
     depends_on:
       - dev_db
+      - mailhog
   dev_db:
     image: postgres:15.0
     container_name: dev_db
@@ -28,20 +29,20 @@ services:
       - '8025:8025'
       - '1025:1025'
 
-  # test_db:
-  #   image: postgres:15.0
-  #   container_name: test_db
-  #   environment:
-  #     - POSTGRES_PASSWORD=test
-  #     - POSTGRES_USER=test
-  #     - POSTGRES_DB=test_db
-  #   ports:
-  #     - '4501:5432'
-  #   volumes:
-  #     - postgresDB_test:/var/lib/postgresql/data
+  test-db:
+    image: postgres:15.0
+    container_name: test-db
+    environment:
+      - POSTGRES_PASSWORD=test123
+      - POSTGRES_USER=test
+      - POSTGRES_DB=test_db
+    ports:
+      - '4501:5432'
+    volumes:
+      - postgresDB_test:/var/lib/postgresql/data
 
 
 
 volumes:
   postgresDB_dev:
-  # postgresDB_test:
+  postgresDB_test:
