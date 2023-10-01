@@ -10,6 +10,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+    RECRUITER
+    CANDIDATE
+  }
 
 model User {
   id        Int      @id @default(autoincrement())
@@ -20,6 +24,7 @@ model User {
   sex  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  role UserRole @default(CANDIDATE)
 }
 
 model Job {
