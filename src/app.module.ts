@@ -19,9 +19,3 @@ import { MailModule } from './mail/mail.module';
   ],
 })
 export class AppModule {}
-console.log(
-  process.env.NODE_ENV,
-  'process.env.NODE_ENV',
-  process.env.DATABASE_URL,
-  'process.env.DATABASE_URL',
-);
