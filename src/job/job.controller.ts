@@ -10,6 +10,7 @@ import {
   HttpCode,
   HttpStatus,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard';
 import { JobService } from './job.service';
@@ -26,8 +27,27 @@ export class JobController {
   }
 
   @Get()
-  getJobs(@GetUser('id') userId: number) {
-    return this.jobService.getJobs(userId);
+  getJobs(
+    @GetUser('id') userId: number,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('search') search?: string,
+    // @Query('role') role: string,
+    // @Query('location') location: string,
+    // @Query('experience') experience: string,
+    // @Query('workType') workType: string,
+    // @Query('jobDuration') jobDuration: string,
+  ) {
+    return this.jobService.getJobs(userId, {
+      limit: limit || 10,
+      offset,
+      search,
+      // role,
+      // location,
+      // experience,
+      // workType,
+      // jobDuration,
+    });
   }
 
   @Get(':id')

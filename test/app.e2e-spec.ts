@@ -145,16 +145,22 @@ describe('Pool App End to End Tests', () => {
   });
   describe('Job Module', () => {
     describe('Job Controller', () => {
+      const dto: CreateJobDto = {
+        title: 'Software Engineer',
+        company: 'Google',
+        companyLocation: 'Lagos',
+        jobDescription: 'Software Engineer experience in Node.js',
+        jobDuration: 'Full Time',
+        experience: 'Senior',
+        workType: 'Remote',
+      };
+      const createJob = (body = dto) =>
+        pactum
+          .spec()
+          .post('/jobs')
+          .withBearerToken('$S{userAt}')
+          .withBody(body);
       describe('Create Job', () => {
-        const dto: CreateJobDto = {
-          title: 'Software Engineer',
-          company: 'Google',
-          companyLocation: 'Lagos',
-          jobDescription: 'Software Engineer experience in Node.js',
-          jobDuration: 'Full Time',
-          experience: 'Senior',
-          workType: 'Remote',
-        };
         it('should throw error if no token and body is provided', () => {
           return pactum.spec().post('/jobs').expectStatus(401);
         });
@@ -166,12 +172,7 @@ describe('Pool App End to End Tests', () => {
             .expectStatus(400);
         });
         it('should create a job', () => {
-          return pactum
-            .spec()
-            .post('/jobs')
-            .withBearerToken('$S{userAt}')
-            .withBody(dto)
-            .expectStatus(201);
+          return createJob().expectStatus(201);
         });
       });
       describe('Get Jobs', () => {
@@ -187,6 +188,48 @@ describe('Pool App End to End Tests', () => {
             .expectJsonLength(1)
             .stores('jobId', 'id');
         });
+        it('should return only a defined number of jobs, default is 10', async () => {
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          await createJob();
+          return pactum
+            .spec()
+            .get('/jobs')
+            .withQueryParams({ limit: 10 })
+            .withBearerToken('$S{userAt}')
+            .expectStatus(200)
+            .expectJsonLength(10);
+        });
+        it('should search for jobs by role', async () => {
+          return pactum
+            .spec()
+            .get('/jobs')
+            .withQueryParams({ search: 'Software Engineer' })
+            .withBearerToken('$S{userAt}')
+            .expectStatus(200)
+            .expectJsonLength(10)
+            .inspect();
+        });
+        // it('should search for jobs by location', () => {
+        //   return pactum
+        //     .spec()
+        //     .get('/jobs?location=Lagos')
+        //     .expectStatus(200)
+        //     .expectJsonLength(1);
+        // });
+        // it('should search for jobs by role and location', () => {});
+        // it('should filter  jobs by worktype', () => {});
+        // it('should filter  jobs by date of creation', () => {});
       });
       describe('Get Job', () => {
         it('should throw error if no token is provided', () => {
@@ -199,8 +242,7 @@ describe('Pool App End to End Tests', () => {
             .withPathParams('id', '$S{jobId}')
             .withBearerToken('$S{userAt}')
             .expectStatus(200)
-            .expectBodyContains('Software Engineer')
-            .inspect();
+            .expectBodyContains('Software Engineer');
         });
       });
       describe('Update Job', () => {
@@ -221,8 +263,7 @@ describe('Pool App End to End Tests', () => {
             .withBody(dto)
             .withBearerToken('$S{userAt}')
             .expectStatus(202)
-            .expectBodyContains('Job updated successfully')
-            .inspect();
+            .expectBodyContains('Job updated successfully');
         });
       });
       describe('Delete Job', () => {
