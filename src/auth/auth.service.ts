@@ -47,6 +47,21 @@ export class AuthService {
       }
     }
   }
+  googleLogin(req) {
+    if (!req.user) {
+      return 'No user from google';
+    }
+    const payload = {
+      email: req.user.email,
+      sub: req.user.userId,
+    };
+    const token = this.signToken(payload.sub, payload.email);
+    return {
+      message: 'User information from google',
+      user: req.user,
+      token,
+    };
+  }
   async login(loginDto: LoginDto) {
     const user = await this.database.user.findUnique({
       where: { email: loginDto.email },
