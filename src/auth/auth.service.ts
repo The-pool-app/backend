@@ -28,7 +28,13 @@ export class AuthService {
       await this.mail.sendMail(
         user.email,
         'Account created',
-        `Your account has been created successfully`,
+        `
+        <html>
+        <h3> Your account has been created successfully </h3>
+        <p>To get started  <br/><button> Verify your account </button></p>
+        <p>Click this <a href="www.thepool.com/verify?token=${token}">link</a> to verify </p>
+        </html>
+        `,
       );
 
       return { message: 'User created successfully', token };
