@@ -1,4 +1,16 @@
-import { Controller, UseGuards, Post, Body, Get, Patch } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Post,
+  Body,
+  Get,
+  Patch,
+  ParseIntPipe,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Delete,
+} from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard';
 import { JobService } from './job.service';
 import { GetUser } from '../auth/decorator';
@@ -14,17 +26,34 @@ export class JobController {
   }
 
   @Get()
-  getJobs() {
-    return this.jobService.getJobs();
+  getJobs(@GetUser('id') userId: number) {
+    return this.jobService.getJobs(userId);
   }
 
   @Get(':id')
-  getJob(id: number) {
-    return this.jobService.getJob(id);
+  getJobById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+  ) {
+    return this.jobService.getJobById(userId, jobId);
   }
 
+  @HttpCode(HttpStatus.ACCEPTED)
   @Patch(':id')
-  updateJob(id: number, @Body() dto: CreateJobDto) {
-    return this.jobService.updateJob(id, dto);
+  updateJob(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+    @Body() dto: CreateJobDto,
+  ) {
+    return this.jobService.updateJobById(userId, jobId, dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteJobById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+  ) {
+    return this.jobService.deleteJobById(userId, jobId);
   }
 }

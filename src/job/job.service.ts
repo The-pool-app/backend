@@ -1,17 +1,28 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { CreateJobDto } from './dto';
+import { CreateJobDto, EditJobDto } from './dto';
 
 @Injectable()
 export class JobService {
   constructor(private database: DatabaseService) {}
 
-  async getJobs() {
-    return this.database.job.findMany();
+  async getJobs(userId: number) {
+    return this.database.job.findMany({
+      where: {
+        postedById: userId,
+      },
+    });
   }
-  async getJob(id: number) {
-    return this.database.job.findUnique({
-      where: { id },
+  async getJobById(userId: number, jobId: number) {
+    return this.database.job.findFirst({
+      where: {
+        id: jobId,
+        postedById: userId,
+      },
     });
   }
   async createJob(userId: number, dto: CreateJobDto) {
@@ -23,10 +34,38 @@ export class JobService {
     });
     return { message: 'Job created successfully' };
   }
-  async updateJob(jobId: number, dto: CreateJobDto) {
-    return this.database.job.update({
-      where: { id: jobId },
+  async updateJobById(userId: number, jobId: number, dto: EditJobDto) {
+    const job = await this.database.job.findFirst({
+      where: {
+        id: jobId,
+      },
+    });
+    if (!job || job.postedById !== userId) {
+      throw new NotFoundException('Job not found');
+    }
+    await this.database.job.update({
+      where: {
+        id: jobId,
+      },
       data: dto,
     });
+    return { message: 'Job updated successfully' };
+  }
+
+  async deleteJobById(userId: number, jobId: number) {
+    const job = await this.database.job.findFirst({
+      where: {
+        id: jobId,
+      },
+    });
+    if (!job || job.postedById !== userId) {
+      throw new ForbiddenException('Job not found');
+    }
+    await this.database.job.delete({
+      where: {
+        id: jobId,
+      },
+    });
+    return { message: 'Job deleted successfully' };
   }
 }

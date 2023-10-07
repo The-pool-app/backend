@@ -5,7 +5,7 @@ import { DatabaseService } from '../src/database/database.service';
 import * as pactum from 'pactum';
 import { LoginDto, RegisterDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
-import { CreateJobDto } from 'src/job/dto';
+import { CreateJobDto, EditJobDto } from 'src/job/dto';
 describe('Pool App End to End Tests', () => {
   let app: INestApplication;
   let database: DatabaseService;
@@ -184,12 +184,57 @@ describe('Pool App End to End Tests', () => {
             .get('/jobs')
             .withBearerToken('$S{userAt}')
             .expectStatus(200)
-            .expectJsonLength(1);
+            .expectJsonLength(1)
+            .stores('jobId', 'id');
         });
       });
-      describe('Get Job', () => {});
-      describe('Update Job', () => {});
-      describe('Delete Job', () => {});
+      describe('Get Job', () => {
+        it('should throw error if no token is provided', () => {
+          return pactum.spec().get('/jobs/1').expectStatus(401);
+        });
+        it('should return job', () => {
+          return pactum
+            .spec()
+            .get('/jobs/{id}')
+            .withPathParams('id', '$S{jobId}')
+            .withBearerToken('$S{userAt}')
+            .expectStatus(200)
+            .expectBodyContains('Software Engineer')
+            .inspect();
+        });
+      });
+      describe('Update Job', () => {
+        const dto: EditJobDto = {
+          title: 'Software Engineer',
+          company: 'Google',
+          companyLocation: 'Lagos',
+          jobDescription: 'Software Engineer experience in Node.js',
+          jobDuration: 'Full Time',
+          experience: 'Senior',
+          workType: 'Hybrid',
+        };
+        it('should update job', () => {
+          return pactum
+            .spec()
+            .patch('/jobs/{id}')
+            .withPathParams('id', '$S{jobId}')
+            .withBody(dto)
+            .withBearerToken('$S{userAt}')
+            .expectStatus(202)
+            .expectBodyContains('Job updated successfully')
+            .inspect();
+        });
+      });
+      describe('Delete Job', () => {
+        it('should delete job', () => {
+          return pactum
+            .spec()
+            .delete('/jobs/{id}')
+            .withPathParams('id', '$S{jobId}')
+            .withBearerToken('$S{userAt}')
+            .expectStatus(204);
+        });
+      });
     });
   });
 });
