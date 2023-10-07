@@ -5,6 +5,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,7 @@ export class AuthService {
     private database: DatabaseService,
     private jwt: JwtService,
     private config: ConfigService,
+    private mail: MailService,
   ) {}
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
@@ -23,6 +25,12 @@ export class AuthService {
         },
       });
       const token = await this.signToken(user.id, user.email);
+      await this.mail.sendMail(
+        user.email,
+        'Account created',
+        `Your account has been created successfully`,
+      );
+
       return { message: 'User created successfully', token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
