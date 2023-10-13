@@ -5,7 +5,7 @@ import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { MailService } from 'src/mail/mail.service';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class AuthService {
@@ -13,7 +13,7 @@ export class AuthService {
     private database: DatabaseService,
     private jwt: JwtService,
     private config: ConfigService,
-    private mail: MailService,
+    private notification: NotificationService,
   ) {}
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
@@ -25,17 +25,15 @@ export class AuthService {
         },
       });
       const token = await this.signToken(user.id, user.email);
-      await this.mail.sendMail(
-        user.email,
-        'Account created',
-        `
-        <html>
+      await this.notification.sendEmail({
+        receivermail: user.email,
+        subject: 'Welcome to The Pool platform',
+        content: `<html>
         <h3> Your account has been created successfully </h3>
         <p>To get started  <br/><button> Verify your account </button></p>
         <p>Click this <a href="www.thepool.com/verify?token=${token}">link</a> to verify </p>
-        </html>
-        `,
-      );
+        </html>`,
+      });
 
       return { message: 'User created successfully', token };
     } catch (error) {
