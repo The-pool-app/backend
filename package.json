@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "prisma:dev:deploy": "prisma migrate deploy",
+    "prisma:deploy": "prisma migrate deploy",
     "db:dev:rm": "docker-compose rm dev_db -s -f -v",
     "db:dev:up": "docker-compose up dev_db -d",
     "db:dev:restart": "yarn db:dev:rm && yarn db:dev:up && sleep 2 && yarn prisma:dev:deploy",
@@ -16,7 +17,7 @@
     "db:test:restart": "yarn db:test:rm && yarn db:test:up && sleep 2 && yarn prisma:test:deploy",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
+    "start": "yarn prisma:deploy && nest start",
     "prestart:dev": "yarn db:dev:restart",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -48,6 +49,7 @@
     "passport-jwt": "^4.0.1",
     "postgres": "^3.3.5",
     "reflect-metadata": "^0.1.13",
+    "@nestjs/cli": "^10.0.0",
     "rxjs": "^7.8.1"
   },
   "devDependencies": {
