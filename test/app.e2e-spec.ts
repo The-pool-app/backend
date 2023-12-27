@@ -20,13 +20,26 @@ describe('Pool App End to End Tests', () => {
       }),
     );
     await app.init();
-    await app.listen(3000);
+    const port = process.env.PORT || 3001;
+    await app.listen(port);
     database = app.get(DatabaseService);
     await database.cleanDb();
-    pactum.request.setBaseUrl('http://localhost:3000');
+    pactum.request.setBaseUrl('http://localhost:3001');
   });
   afterAll(() => {
     app.close();
+  });
+
+  describe('Health Check', () => {
+    it('should return 200', () => {
+      return pactum.spec().get('/health').expectStatus(200);
+    });
+    it('should return all system information', () => {
+      return pactum
+        .spec()
+        .get('/health')
+        .expectBodyContains('All systems are operational');
+    });
   });
   describe('Auth Module', () => {
     describe('Auth Controller', () => {

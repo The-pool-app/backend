@@ -5,7 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { JobModule } from './job/job.module';
 import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
-
+import { AppController } from './app.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -17,5 +17,6 @@ import { NotificationModule } from './notification/notification.module';
     JobModule,
     NotificationModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

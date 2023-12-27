@@ -16,8 +16,10 @@ import { JwtAuthGuard } from '../auth/guard';
 import { JobService } from './job.service';
 import { GetUser } from '../auth/decorator';
 import { CreateJobDto } from './dto';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
+@ApiTags('Jobs')
 @Controller('jobs')
 export class JobController {
   constructor(private jobService: JobService) {}

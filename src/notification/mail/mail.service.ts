@@ -1,6 +1,6 @@
+import emailjs from '@emailjs/nodejs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import emailjs from '@emailjs/nodejs';
 
 @Injectable()
 export class MailService {
@@ -20,7 +20,7 @@ export class MailService {
     //   privateKey: '<YOUR_PRIVATE_KEY>', // optional, highly recommended for security reasons
     // });
   }
-  async sendMail(to: string, subject: string, html: string) {
+  async sendMail(_to: string, _subject: string, _html: string) {
     // const mailOptions = {
     //   from: this.config.get('MAIL_FROM'),
     //   to,
