@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsNotEmpty } from 'class-validator';
 
 // enum IGender {
@@ -6,9 +7,11 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 // }
 
 export class RegisterDto {
+  @ApiProperty()
   @IsNotEmpty()
   pin: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
   email: string;

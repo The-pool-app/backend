@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDate,
   IsEnum,
@@ -12,26 +13,32 @@ enum IGender {
 }
 
 export class EditUserDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   firstName?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   lastName?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
   jobRole?: string[];
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsPhoneNumber()
   phoneNumber?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsEnum(IGender)
   sex: string;
 
+  @ApiProperty()
   @IsDate()
   @IsNotEmpty()
   dateOfBirth?: string;
