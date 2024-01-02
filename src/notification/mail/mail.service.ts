@@ -4,10 +4,9 @@ import { Resend } from 'resend';
 
 @Injectable()
 export class MailService {
-  private readonly transporter;
   constructor(private config: ConfigService) {}
   async sendMail(to: string, subject: string, html: string) {
-    const resend = new Resend();
+    const resend = new Resend(this.config.get('RESEND_API_KEY'));
     const { data, error } = await resend.emails.send({
       from: 'Acme <onboarding@the-pool.com>',
       to: [`<${to}>`],
