@@ -56,7 +56,7 @@ describe('Pool App End to End Tests', () => {
             .withBody({ ...dto, email: '' })
             .expectStatus(400);
         });
-        it('should throw error if password is empty', () => {
+        it('should throw error if pin is empty', () => {
           return pactum
             .spec()
             .post('/auth/register')
@@ -72,6 +72,14 @@ describe('Pool App End to End Tests', () => {
             .post('/auth/register')
             .withBody(dto)
             .expectStatus(201);
+        });
+        it('should send magic link email to user', () => {
+          return pactum
+            .spec()
+            .post('/auth/register')
+            .withBody(dto)
+            .expectStatus(201)
+            .expectBodyContains('Magic link sent to email');
         });
       });
       describe('Login User', () => {
@@ -112,181 +120,210 @@ describe('Pool App End to End Tests', () => {
             .stores('userAt', 'token');
         });
       });
-    });
-  });
-  describe('User Module', () => {
-    describe('User Controller', () => {
-      describe('Get Current User', () => {
-        it('should throw error if no token is provided', () => {
-          return pactum.spec().get('/users/me').expectStatus(401);
-        });
-        it('return current user', () => {
+      describe('Recover Pin', () => {
+        it('should throw error if email is empty', () => {
           return pactum
             .spec()
-            .get('/users/me')
-            .withBearerToken('$S{userAt}')
+            .post('/auth/recover-pin')
+            .withBody({ email: '' })
+            .expectStatus(400);
+        });
+        it('should throw error if email is not found', () => {
+          return pactum
+            .spec()
+            .post('/auth/recover-pin')
+            .withBody({ email: 'john@test2.com' });
+        });
+        it('should recover pin', () => {
+          return pactum
+            .spec()
+            .post('/auth/recover-pin')
+            .withBody({ email: 'john@test.com' })
+            .expectStatus(200);
+        });
+        it('send url to update pin', () => {
+          return pactum
+            .spec()
+            .post('/auth/recover-pin')
+            .withBody({ pin: '0123', confirmPin: '0123' })
             .expectStatus(200);
         });
       });
-      describe('Update User', () => {
-        const dto: EditUserDto = {
-          firstName: 'John',
-          lastName: 'Doe',
-          jobRole: ['Software Engineer'],
-          phoneNumber: '08012345678',
-          sex: 'Male',
-          dateOfBirth: '1999-01-01',
-        };
-        it('should throw error when body is empty', () => {
-          return pactum
-            .spec()
-            .patch('/users/me')
-            .withBearerToken('$S{userAt}')
-            .withBody({})
-            .expectStatus(400);
+    });
+    describe('User Module', () => {
+      describe('User Controller', () => {
+        describe('Get Current User', () => {
+          it('should throw error if no token is provided', () => {
+            return pactum.spec().get('/users/me').expectStatus(401);
+          });
+          it('return current user', () => {
+            return pactum
+              .spec()
+              .get('/users/me')
+              .withBearerToken('$S{userAt}')
+              .expectStatus(200);
+          });
         });
-        it('should update user', () => {
-          return pactum
-            .spec()
-            .patch('/users/me')
-            .withBearerToken('$S{userAt}')
-            .withBody(dto)
-            .expectStatus(400);
+        describe('Update User', () => {
+          const dto: EditUserDto = {
+            firstName: 'John',
+            lastName: 'Doe',
+            jobRole: ['Software Engineer'],
+            phoneNumber: '08012345678',
+            sex: 'Male',
+            dateOfBirth: '1999-01-01',
+          };
+          it('should throw error when body is empty', () => {
+            return pactum
+              .spec()
+              .patch('/users/me')
+              .withBearerToken('$S{userAt}')
+              .withBody({})
+              .expectStatus(400);
+          });
+          it('should update user', () => {
+            return pactum
+              .spec()
+              .patch('/users/me')
+              .withBearerToken('$S{userAt}')
+              .withBody(dto)
+              .expectStatus(400);
+          });
         });
       });
     });
-  });
-  describe('Job Module', () => {
-    describe('Job Controller', () => {
-      const dto: CreateJobDto = {
-        title: 'Software Engineer',
-        company: 'Google',
-        companyLocation: 'Lagos',
-        jobDescription: 'Software Engineer experience in Node.js',
-        jobDuration: 'Full Time',
-        experience: 'Senior',
-        workType: 'Remote',
-      };
-      const createJob = (body = dto) =>
-        pactum
-          .spec()
-          .post('/jobs')
-          .withBearerToken('$S{userAt}')
-          .withBody(body);
-      describe('Create Job', () => {
-        it('should throw error if no token and body is provided', () => {
-          return pactum.spec().post('/jobs').expectStatus(401);
-        });
-        it('should throw error if no body is provided', () => {
-          return pactum
-            .spec()
-            .post('/jobs')
-            .withBearerToken('$S{userAt}')
-            .expectStatus(400);
-        });
-        it('should create a job', () => {
-          return createJob().expectStatus(201);
-        });
-      });
-      describe('Get Jobs', () => {
-        it('should throw error if no token is provided', () => {
-          return pactum.spec().get('/jobs').expectStatus(401);
-        });
-        it('should return jobs', () => {
-          return pactum
-            .spec()
-            .get('/jobs')
-            .withBearerToken('$S{userAt}')
-            .expectStatus(200)
-            .expectJsonLength(1)
-            .stores('jobId', 'id');
-        });
-        it('should return only a defined number of jobs, default is 10', async () => {
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          await createJob();
-          return pactum
-            .spec()
-            .get('/jobs')
-            .withQueryParams({ limit: 10 })
-            .withBearerToken('$S{userAt}')
-            .expectStatus(200)
-            .expectJsonLength(10);
-        });
-        it('should search for jobs by role', async () => {
-          return pactum
-            .spec()
-            .get('/jobs')
-            .withQueryParams({ search: 'Software Engineer' })
-            .withBearerToken('$S{userAt}')
-            .expectStatus(200)
-            .expectJsonLength(10)
-            .inspect();
-        });
-        // it('should search for jobs by location', () => {
-        //   return pactum
-        //     .spec()
-        //     .get('/jobs?location=Lagos')
-        //     .expectStatus(200)
-        //     .expectJsonLength(1);
-        // });
-        // it('should search for jobs by role and location', () => {});
-        // it('should filter  jobs by worktype', () => {});
-        // it('should filter  jobs by date of creation', () => {});
-      });
-      describe('Get Job', () => {
-        it('should throw error if no token is provided', () => {
-          return pactum.spec().get('/jobs/1').expectStatus(401);
-        });
-        it('should return job', () => {
-          return pactum
-            .spec()
-            .get('/jobs/{id}')
-            .withPathParams('id', '$S{jobId}')
-            .withBearerToken('$S{userAt}')
-            .expectStatus(200)
-            .expectBodyContains('Software Engineer');
-        });
-      });
-      describe('Update Job', () => {
-        const dto: EditJobDto = {
+    describe('Job Module', () => {
+      describe('Job Controller', () => {
+        const dto: CreateJobDto = {
           title: 'Software Engineer',
           company: 'Google',
           companyLocation: 'Lagos',
           jobDescription: 'Software Engineer experience in Node.js',
           jobDuration: 'Full Time',
           experience: 'Senior',
-          workType: 'Hybrid',
+          workType: 'Remote',
         };
-        it('should update job', () => {
-          return pactum
+        const createJob = (body = dto) =>
+          pactum
             .spec()
-            .patch('/jobs/{id}')
-            .withPathParams('id', '$S{jobId}')
-            .withBody(dto)
+            .post('/jobs')
             .withBearerToken('$S{userAt}')
-            .expectStatus(202)
-            .expectBodyContains('Job updated successfully');
+            .withBody(body);
+        describe('Create Job', () => {
+          it('should throw error if no token and body is provided', () => {
+            return pactum.spec().post('/jobs').expectStatus(401);
+          });
+          it('should throw error if no body is provided', () => {
+            return pactum
+              .spec()
+              .post('/jobs')
+              .withBearerToken('$S{userAt}')
+              .expectStatus(400);
+          });
+          it('should create a job', () => {
+            return createJob().expectStatus(201);
+          });
         });
-      });
-      describe('Delete Job', () => {
-        it('should delete job', () => {
-          return pactum
-            .spec()
-            .delete('/jobs/{id}')
-            .withPathParams('id', '$S{jobId}')
-            .withBearerToken('$S{userAt}')
-            .expectStatus(204);
+        describe('Get Jobs', () => {
+          it('should throw error if no token is provided', () => {
+            return pactum.spec().get('/jobs').expectStatus(401);
+          });
+          it('should return jobs', () => {
+            return pactum
+              .spec()
+              .get('/jobs')
+              .withBearerToken('$S{userAt}')
+              .expectStatus(200)
+              .expectJsonLength(1)
+              .stores('jobId', 'id');
+          });
+          it('should return only a defined number of jobs, default is 10', async () => {
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            await createJob();
+            return pactum
+              .spec()
+              .get('/jobs')
+              .withQueryParams({ limit: 10 })
+              .withBearerToken('$S{userAt}')
+              .expectStatus(200)
+              .expectJsonLength(10);
+          });
+          it('should search for jobs by role', async () => {
+            return pactum
+              .spec()
+              .get('/jobs')
+              .withQueryParams({ search: 'Software Engineer' })
+              .withBearerToken('$S{userAt}')
+              .expectStatus(200)
+              .expectJsonLength(10)
+              .inspect();
+          });
+          // it('should search for jobs by location', () => {
+          //   return pactum
+          //     .spec()
+          //     .get('/jobs?location=Lagos')
+          //     .expectStatus(200)
+          //     .expectJsonLength(1);
+          // });
+          // it('should search for jobs by role and location', () => {});
+          // it('should filter  jobs by worktype', () => {});
+          // it('should filter  jobs by date of creation', () => {});
+        });
+        describe('Get Job', () => {
+          it('should throw error if no token is provided', () => {
+            return pactum.spec().get('/jobs/1').expectStatus(401);
+          });
+          it('should return job', () => {
+            return pactum
+              .spec()
+              .get('/jobs/{id}')
+              .withPathParams('id', '$S{jobId}')
+              .withBearerToken('$S{userAt}')
+              .expectStatus(200)
+              .expectBodyContains('Software Engineer');
+          });
+        });
+        describe('Update Job', () => {
+          const dto: EditJobDto = {
+            title: 'Software Engineer',
+            company: 'Google',
+            companyLocation: 'Lagos',
+            jobDescription: 'Software Engineer experience in Node.js',
+            jobDuration: 'Full Time',
+            experience: 'Senior',
+            workType: 'Hybrid',
+          };
+          it('should update job', () => {
+            return pactum
+              .spec()
+              .patch('/jobs/{id}')
+              .withPathParams('id', '$S{jobId}')
+              .withBody(dto)
+              .withBearerToken('$S{userAt}')
+              .expectStatus(202)
+              .expectBodyContains('Job updated successfully');
+          });
+        });
+        describe('Delete Job', () => {
+          it('should delete job', () => {
+            return pactum
+              .spec()
+              .delete('/jobs/{id}')
+              .withPathParams('id', '$S{jobId}')
+              .withBearerToken('$S{userAt}')
+              .expectStatus(204);
+          });
         });
       });
     });
