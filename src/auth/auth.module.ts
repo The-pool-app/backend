@@ -4,6 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategy';
 import { GoogleStrategy } from './strategy/google.strategy';
+// import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [JwtModule.register({})],

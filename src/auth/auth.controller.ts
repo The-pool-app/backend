@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, ResetPasswordDto, UpdatePinDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -39,5 +39,15 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req) {
     return this.authService.googleLogin(req);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() email: ResetPasswordDto) {
+    return this.authService.resetPassword(email);
+  }
+
+  @Post('reset-pin')
+  async updatePin(@Body() dto: UpdatePinDto) {
+    return this.authService.resetPin(dto);
   }
 }

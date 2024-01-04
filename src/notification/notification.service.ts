@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from './mail/mail.service';
-import { SendmaiLDto } from './mail/dto';
 import { InjectNovu } from './notification.provider';
 import { Novu } from '@novu/node';
 
@@ -19,13 +18,7 @@ export class NotificationService {
     });
     return result.data;
   }
-  sendEmail(sendMailDto: SendmaiLDto) {
-    return this.mailService.sendMail(
-      sendMailDto.receivermail,
-      sendMailDto.subject,
-      sendMailDto.content,
-    );
-  }
+
   async sendEmailToSubscriber(
     subscriberId: string,
     email: string,
