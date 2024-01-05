@@ -30,8 +30,12 @@ export class AuthService {
       await this.notification.sendMailWithResend(
         user.email,
         'Welcome to the pool',
-        `<h1>Welcome to the pool</h1><p>Hi ${user.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
-        your magic link is <a href="http://localhost:3000/auth/magic-link?token=${token}"> here</a>
+        `<h1>Welcome to the pool</h1><p>Hi ${
+          user.email
+        },</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
+        your magic link is <a href="${this.config.get(
+          'BASE_URL',
+        )}/auth/magic-link?token=${token}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
       );
       // this.notification.sendMailWithTemplate(
