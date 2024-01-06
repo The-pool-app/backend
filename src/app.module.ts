@@ -7,8 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
 import { AppController } from './app.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { PaymentModule } from './payment/payment.module';
 import { ChatModule } from './chat/chat.module';
+import { PaymentModule } from './payment/payment.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
