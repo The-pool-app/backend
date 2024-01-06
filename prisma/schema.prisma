@@ -15,11 +15,23 @@ enum UserRole {
   CANDIDATE
 }
 
+enum ApplicantExperienceLevel {
+  JUNIOR
+  MID_LEVEL
+  SENIOR
+}
+
 enum jobDuration {
   FULL_TIME
   PART_TIME
   CONTRACT
   INTERNSHIP
+}
+
+enum ApplicantStatus {
+  ACTIVELY_LOOKING
+  NOT_LOOKING
+  OPEN_TO_OFFERS
 }
 
 enum workType {
@@ -28,36 +40,63 @@ enum workType {
   HYBRID
 }
 
+enum Gender {
+  MALE
+  FEMALE
+}
+
+model subscription_type {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model messages {
+  id         String   @id @default(uuid())
+  content    String
+  senderId   Int
+  receiverId Int
+  createdAt  DateTime @default(now())
+}
+
+model job_details {
+  jobId          Int                      @id
+  title          String
+  jobDescription String
+  workType       workType
+  jobDuration    jobDuration
+  experience     ApplicantExperienceLevel
+  Job            Job[]
+}
+
+model company {
+  name        String @id
+  description String
+  location    String
+  jobs        Int[]
+}
+
 model User {
   id                 Int                  @id @default(autoincrement())
-  email              String               @unique
-  pin                String
-  firstName          String?
-  lastName           String?
-  phoneNumber        String?
-  dateOfBirth        DateTime?
-  jobRole            String[]
-  sex                String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  role               UserRole             @default(CANDIDATE)
-  JobCreated         Job[]
+  roleId             UserRole             @default(CANDIDATE)
+  subscriptionTypeId Int
+  userDetail         personal_details?
+  activities         user_activities[]
+  education          education[]
+  work_experience    work_experience[]
   PasswordResetToken PasswordResetToken[]
+  jobs               Job[]
 }
 
 model Job {
-  id              Int      @id @default(autoincrement())
-  title           String
-  jobDescription  String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  company         String
-  companyLocation String
-  jobDuration     String
-  workType        String
-  experience      String
-  postedById      Int
-  postedBy        User     @relation(fields: [postedById], references: [id])
+  id               Int         @id @default(autoincrement())
+  postedById       Int
+  postedBy         User        @relation(fields: [postedById], references: [id])
+  jobDetails       job_details @relation(fields: [job_detailsJobId], references: [jobId])
+  job_detailsJobId Int         @unique
 }
 
 model PasswordResetToken {
@@ -65,4 +104,77 @@ model PasswordResetToken {
   user      User     @relation(fields: [userId], references: [id])
   token     String   @id
   createdAt DateTime @default(now())
+}
+
+model education {
+  userId                     Int
+  user                       User                  @relation(fields: [userId], references: [id])
+  schoolName                 String                @id
+  degree                     String
+  grade                      String
+  graduationDate             DateTime
+  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
+  professional_detailsUserId Int?
+}
+
+model work_experience {
+  userId                     Int
+  user                       User                  @relation(fields: [userId], references: [id])
+  companyName                String                @id
+  jobTitle                   String
+  startDate                  DateTime
+  endDate                    DateTime
+  description                String
+  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
+  professional_detailsUserId Int?
+}
+
+model user_activities {
+  userId  Int    @id
+  user    User   @relation(fields: [userId], references: [id])
+  content String
+}
+
+model personal_details {
+  userId                Int      @unique
+  email                 String   @id @unique
+  pin                   String
+  firstName             String
+  lastName              String
+  phoneNumber           String
+  sex                   Gender
+  dateOfBirth           DateTime
+  meansOfIdentification String
+  profilePicture        String
+  profileVideo          String
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id])
+}
+
+model applicant_status {
+  id   Int             @id @default(autoincrement())
+  name ApplicantStatus
+}
+
+model role {
+  id          Int    @id @default(autoincrement())
+  name        String
+  description String
+}
+
+model professional_details {
+  userId              Int                      @id
+  statusId            Int
+  jobRole             String
+  yearsOfExperience   Int
+  professionalSummary String
+  jobPreference       workType
+  skills              String[]
+  interests           String[]
+  salaryRange         String
+  experienceLevel     ApplicantExperienceLevel
+  highestEducation    String
+  education           education[]
+  allWorkExperience   work_experience[]
+  createdAt           DateTime                 @default(now())
 }
