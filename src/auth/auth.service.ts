@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../notification/mail/mail.service';
 import { randomBytes } from 'crypto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +24,7 @@ export class AuthService {
         data: {
           email: dto.email,
           pin: hash,
+          role: dto.role as UserRole, // Cast dto.role to UserRole
         },
       });
       const token = await this.signToken(user.id, user.email);
