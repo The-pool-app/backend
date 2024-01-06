@@ -118,7 +118,7 @@ model education {
 }
 
 model work_experience {
-  userId                     Int
+  userId                     Int 
   user                       User                  @relation(fields: [userId], references: [id])
   companyName                String                @id
   jobTitle                   String
@@ -153,7 +153,7 @@ model personal_details {
 
 model applicant_status {
   id   Int             @id @default(autoincrement())
-  name ApplicantStatus
+  name ApplicantStatus @default(NOT_LOOKING)
 }
 
 model role {
@@ -168,7 +168,7 @@ model professional_details {
   jobRole             String
   yearsOfExperience   Int
   professionalSummary String
-  jobPreference       workType
+  jobPreference       workType                @default(REMOTE)
   skills              String[]
   interests           String[]
   salaryRange         String
