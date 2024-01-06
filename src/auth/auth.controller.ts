@@ -4,12 +4,13 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto, ResetPasswordDto, UpdatePinDto } from './dto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 
@@ -41,13 +42,13 @@ export class AuthController {
     return this.authService.googleLogin(req);
   }
 
-  @Post('reset-password')
-  async resetPassword(@Body() email: ResetPasswordDto) {
-    return this.authService.resetPassword(email);
+  @Post('forgot-pin')
+  async resetPassword(@Body() email: ForgotPasswordDto) {
+    return this.authService.forgotPin(email);
   }
 
-  @Post('reset-pin')
-  async updatePin(@Body() dto: UpdatePinDto) {
-    return this.authService.resetPin(dto);
+  @Post('update-pin')
+  async updatePin(@Body() dto: UpdatePinDto, @Param('token') token: string) {
+    return this.authService.updatePin(dto, token);
   }
 }

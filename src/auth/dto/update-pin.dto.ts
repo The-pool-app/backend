@@ -10,6 +10,6 @@ export class UpdatePinDto {
   @ApiProperty()
   @IsNotEmpty()
   @MinLength(4)
-  @Matches('pin')
+  @Matches(/^[0-9]{4}$/)
   confirmPin: string;
 }

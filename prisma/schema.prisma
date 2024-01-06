@@ -29,32 +29,40 @@ enum workType {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  email       String    @unique
-  pin         String
-  firstName   String?
-  lastName    String?
-  phoneNumber String?
-  dateOfBirth DateTime?
-  jobRole     String[]
-  sex         String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  role        UserRole  @default(CANDIDATE)
+  id                 Int                  @id @default(autoincrement())
+  email              String               @unique
+  pin                String
+  firstName          String?
+  lastName           String?
+  phoneNumber        String?
+  dateOfBirth        DateTime?
+  jobRole            String[]
+  sex                String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  role               UserRole             @default(CANDIDATE)
   JobCreated         Job[]
+  PasswordResetToken PasswordResetToken[]
 }
 
 model Job {
-  id              Int         @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   title           String
   jobDescription  String
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-  company        String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  company         String
   companyLocation String
   jobDuration     String
-  workType     String
-  experience String
+  workType        String
+  experience      String
   postedById      Int
-  postedBy        User        @relation(fields: [postedById], references: [id])
+  postedBy        User     @relation(fields: [postedById], references: [id])
+}
+
+model PasswordResetToken {
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  token     String   @id
+  createdAt DateTime @default(now())
 }

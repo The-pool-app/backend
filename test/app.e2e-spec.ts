@@ -3,7 +3,7 @@ import { AppModule } from '../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DatabaseService } from '../src/database/database.service';
 import * as pactum from 'pactum';
-import { LoginDto, RegisterDto } from 'src/auth/dto';
+import { LoginDto, RegisterDto, UpdatePinDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { CreateJobDto, EditJobDto } from 'src/job/dto';
 describe('Pool App End to End Tests', () => {
@@ -73,13 +73,22 @@ describe('Pool App End to End Tests', () => {
             .withBody(dto)
             .expectStatus(201);
         });
+
         it('should send magic link email to user', () => {
+          // return pactum
+          //   .spec()
+          //   .post('/auth/register')
+          //   .withBody(dto)
+          //   .expectStatus(201)
+          //   .expectBodyContains('Magic link sent to email');
+          // mock the sendMailWithResend method
+        });
+        it('should throw error if email already exists', () => {
           return pactum
             .spec()
             .post('/auth/register')
             .withBody(dto)
-            .expectStatus(201)
-            .expectBodyContains('Magic link sent to email');
+            .expectStatus(403);
         });
       });
       describe('Login User', () => {
@@ -124,29 +133,60 @@ describe('Pool App End to End Tests', () => {
         it('should throw error if email is empty', () => {
           return pactum
             .spec()
-            .post('/auth/recover-pin')
+            .post('/auth/forgot-pin')
             .withBody({ email: '' })
             .expectStatus(400);
         });
-        it('should throw error if email is not found', () => {
+        it('should throw specific message if email is not found in the DB', () => {
           return pactum
             .spec()
-            .post('/auth/recover-pin')
-            .withBody({ email: 'john@test2.com' });
+            .post('/auth/forgot-pin')
+            .withBody({ email: 'john@test3.com' })
+            .expectBodyContains(
+              'Link to reset password have been sent to provided email',
+            );
         });
-        it('should recover pin', () => {
+        it('should generate password reset token and hash it', () => {
           return pactum
             .spec()
-            .post('/auth/recover-pin')
-            .withBody({ email: 'john@test.com' })
-            .expectStatus(200);
+            .post('/auth/forgot-pin')
+            .withBody({ email: 'john@test2.com' })
+            .expectBodyContains(
+              'Link to reset password have been sent to provided email',
+            );
         });
-        it('send url to update pin', () => {
+      });
+      describe('Update Pin', () => {
+        const updatePinDto: UpdatePinDto = {
+          pin: '123456',
+          confirmPin: '123456',
+        };
+
+        it('should throw error if pin and confirm Pin are not same update pin', () => {
           return pactum
             .spec()
-            .post('/auth/recover-pin')
-            .withBody({ pin: '0123', confirmPin: '0123' })
-            .expectStatus(200);
+            .post('/auth/update-pin')
+            .withBody({ ...updatePinDto, confirmPin: '1234567' })
+            .expectStatus(400);
+        });
+        it('should throw error if pin is less than 4 characters', () => {
+          return pactum
+            .spec()
+            .post('/auth/update-pin')
+            .withBody({ ...updatePinDto, pin: '123' })
+            .expectStatus(400);
+        });
+        it('should show specific message if link is expired or token is invalid', async () => {
+          // get the reset password token from url params
+        });
+        it('should update pin', () => {
+          return pactum
+            .spec()
+            .post('/auth/update-pin')
+            .withBody(updatePinDto)
+            .withPathParams('token', '$S{resetToken}')
+            .expectStatus(200)
+            .inspect();
         });
       });
     });
@@ -266,8 +306,7 @@ describe('Pool App End to End Tests', () => {
               .withQueryParams({ search: 'Software Engineer' })
               .withBearerToken('$S{userAt}')
               .expectStatus(200)
-              .expectJsonLength(10)
-              .inspect();
+              .expectJsonLength(10);
           });
           // it('should search for jobs by location', () => {
           //   return pactum

@@ -1,13 +1,16 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { LoginDto, RegisterDto, ResetPasswordDto, UpdatePinDto } from './dto';
+import {
+  ForbiddenException,
+  Injectable,
+  BadRequestException,
+} from '@nestjs/common';
+import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { DatabaseService } from '../database/database.service';
 import * as argon from 'argon2';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-// import { NotificationService } from 'src/notification/notification.service';
-import { MailService } from 'src/notification/mail/mail.service';
-//import emailjs from '@emailjs/nodejs';
+import { MailService } from '../notification/mail/mail.service';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -38,13 +41,6 @@ export class AuthService {
         )}/auth/magic-link?token=${token}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
       );
-      // this.notification.sendMailWithTemplate(
-      //   user.email,
-      //   'Welcome to the pool',
-      //   `<h1>Welcome to the pool</h1><p>Hi ${user.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
-      //   your magic link is <a href="http://localhost:3000/auth/magic-link?token=${token}">here</a>
-      //   </p>`,
-      // );
       return { message: 'User created successfully', token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
@@ -84,29 +80,71 @@ export class AuthService {
     const token = await this.signToken(user.id, user.email);
     return { message: 'User login successfully', token };
   }
-  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+  async forgotPin(resetPasswordDto: ForgotPasswordDto) {
     const user = await this.database.user.findUnique({
       where: { email: resetPasswordDto.email },
     });
     if (!user) {
-      throw new ForbiddenException('Invalid credentials');
+      return {
+        message: 'Link to reset password have been sent to provided email',
+      };
     }
-    const token = await this.signToken(user.id, user.email);
+    const resetToken = this.createResetToken();
+    const hash = await this.hashResetToken(resetToken);
+    await this.database.passwordResetToken.create({
+      data: {
+        token: hash,
+        userId: user.id,
+      },
+    });
     await this.notification.sendMailWithResend(
       user.email,
       'Password Reset Request',
-      `<p>Hi ${user.firstName},</p><p>You requested to update your password </br> Please click the link below to update your pin.</p><p>
-        the magic link is <a href="http://localhost:3000/auth/magic-link?token=${token}"> here</a>
+      `<p>Hi ${user.firstName},</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
+        the magic link is <a href="http://localhost:3000/auth/update-pin?token=${resetToken}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
     );
-    return { message: 'User password updated successfully' };
+    return {
+      message: 'Link to reset password have been sent to provided email',
+    };
   }
-  async resetPin(resetPinDto: UpdatePinDto) {
-    // decode the jwt token sent from the client
-    // get the user id from the token
-    // update the user pin
-    // return success message
-    console.log(resetPinDto);
+  async updatePin(updatePinDto: UpdatePinDto, token: string) {
+    // get the reset password token from url params
+    const resetPasswordToken =
+      await this.database.passwordResetToken.findUnique({
+        where: { token },
+      });
+    if (!resetPasswordToken) {
+      return {
+        message: ' The link to reset password has expired or is invalid',
+      };
+    }
+    // compare the token with the one in the password reset tokens table
+    const isTokenValid = await this.verifyResetToken(
+      token,
+      resetPasswordToken.token,
+    );
+    if (!isTokenValid) {
+      return {
+        message: ' The link to reset password has expired or is invalid',
+      };
+    }
+    // compare the time the token was created with the current time to check if it has expired
+    const ONE_HOUR = 60 * 60 * 1000; /* ms */
+    const isTokenExpired =
+      resetPasswordToken.createdAt.getTime() + ONE_HOUR < Date.now();
+    if (isTokenExpired) {
+      return {
+        message: ' The link to reset password has expired or is invalid',
+      };
+    }
+    // if token is valid, update the user password
+
+    const hash = await argon.hash(updatePinDto.pin);
+    await this.database.user.update({
+      where: { id: resetPasswordToken.userId },
+      data: { pin: hash },
+    });
     return { message: 'User pin updated successfully' };
   }
   async signToken(userId: number, email: string) {
@@ -116,5 +154,18 @@ export class AuthService {
       secret: this.config.get('JWT_SECRET'),
     });
     return access_token;
+  }
+  async hashResetToken(token: string) {
+    const hash = await argon.hash(token);
+    return hash;
+  }
+  createResetToken(length: number = 32) {
+    const token = randomBytes(length).toString('hex');
+    return token;
+  }
+
+  async verifyResetToken(token: string, hash: string) {
+    const isTokenValid = await argon.verify(hash, token);
+    return isTokenValid;
   }
 }
