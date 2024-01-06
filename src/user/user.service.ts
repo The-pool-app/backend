@@ -13,4 +13,10 @@ export class UserService {
       },
     });
   }
+  deleteProfile(userId: number) {
+    return this.database.$transaction([
+      this.database.job.deleteMany({ where: { postedById: userId } }),
+      this.database.user.delete({ where: { id: userId } }),
+    ]);
+  }
 }
