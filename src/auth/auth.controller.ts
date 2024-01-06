@@ -4,8 +4,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -48,7 +48,7 @@ export class AuthController {
   }
 
   @Post('update-pin')
-  async updatePin(@Body() dto: UpdatePinDto, @Param('token') token: string) {
+  async updatePin(@Body() dto: UpdatePinDto, @Query('token') token: string) {
     return this.authService.updatePin(dto, token);
   }
 }

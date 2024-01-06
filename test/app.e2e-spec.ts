@@ -1,4 +1,4 @@
-import { Test } from '@nestjs/testing';
+import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DatabaseService } from '../src/database/database.service';
@@ -6,13 +6,20 @@ import * as pactum from 'pactum';
 import { LoginDto, RegisterDto, UpdatePinDto } from 'src/auth/dto';
 import { EditUserDto } from 'src/user/dto';
 import { CreateJobDto, EditJobDto } from 'src/job/dto';
+import { MailService } from '../src/notification/mail/mail.service';
+
 describe('Pool App End to End Tests', () => {
   let app: INestApplication;
   let database: DatabaseService;
   beforeAll(async () => {
-    const moduleRef = await Test.createTestingModule({
+    const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue({
+        sendMailWithResend: jest.fn(),
+      })
+      .compile();
     app = moduleRef.createNestApplication();
     app.useGlobalPipes(
       new ValidationPipe({
@@ -146,14 +153,15 @@ describe('Pool App End to End Tests', () => {
               'Link to reset password have been sent to provided email',
             );
         });
-        it('should generate password reset token and hash it', () => {
+        it('should generate a password reset token and hash it', () => {
           return pactum
             .spec()
             .post('/auth/forgot-pin')
             .withBody({ email: 'john@test2.com' })
             .expectBodyContains(
               'Link to reset password have been sent to provided email',
-            );
+            )
+            .inspect();
         });
       });
       describe('Update Pin', () => {
@@ -178,6 +186,15 @@ describe('Pool App End to End Tests', () => {
         });
         it('should show specific message if link is expired or token is invalid', async () => {
           // get the reset password token from url params
+          return pactum
+            .spec()
+            .post('/auth/update-pin')
+            .withQueryParams('token', 'sample-query-param')
+            .expectBodyContains(
+              'The link to reset password has expired or is invalid',
+            )
+            .withBody(updatePinDto)
+            .inspect();
         });
         it('should update pin', () => {
           return pactum

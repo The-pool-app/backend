@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  BadRequestException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { DatabaseService } from '../database/database.service';
 import * as argon from 'argon2';
@@ -97,11 +93,17 @@ export class AuthService {
         userId: user.id,
       },
     });
+    // add token to headars of response
+
     await this.notification.sendMailWithResend(
       user.email,
       'Password Reset Request',
-      `<p>Hi ${user.firstName},</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
-        the magic link is <a href="http://localhost:3000/auth/update-pin?token=${resetToken}"> here</a>
+      `<p>Hi ${
+        user.firstName
+      },</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
+        the link is <a href="${this.config.get(
+          'BASE_URL',
+        )}/auth/update-pin?token=${resetToken}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
     );
     return {
@@ -109,43 +111,53 @@ export class AuthService {
     };
   }
   async updatePin(updatePinDto: UpdatePinDto, token: string) {
-    // get the reset password token from url params
-    const resetPasswordToken =
-      await this.database.passwordResetToken.findUnique({
-        where: { token },
-      });
-    if (!resetPasswordToken) {
-      return {
-        message: ' The link to reset password has expired or is invalid',
-      };
-    }
-    // compare the token with the one in the password reset tokens table
-    const isTokenValid = await this.verifyResetToken(
-      token,
-      resetPasswordToken.token,
-    );
-    if (!isTokenValid) {
-      return {
-        message: ' The link to reset password has expired or is invalid',
-      };
-    }
-    // compare the time the token was created with the current time to check if it has expired
-    const ONE_HOUR = 60 * 60 * 1000; /* ms */
-    const isTokenExpired =
-      resetPasswordToken.createdAt.getTime() + ONE_HOUR < Date.now();
-    if (isTokenExpired) {
-      return {
-        message: ' The link to reset password has expired or is invalid',
-      };
-    }
-    // if token is valid, update the user password
+    try {
+      if (updatePinDto.pin !== updatePinDto.confirmPin)
+        throw new ForbiddenException('Pin does not match');
 
-    const hash = await argon.hash(updatePinDto.pin);
-    await this.database.user.update({
-      where: { id: resetPasswordToken.userId },
-      data: { pin: hash },
-    });
-    return { message: 'User pin updated successfully' };
+      // get the reset password token from url params
+      const resetPasswordToken =
+        await this.database.passwordResetToken.findUnique({
+          where: { token },
+        });
+      if (!resetPasswordToken) {
+        return {
+          message: ' The link to reset password has expired or is invalid',
+        };
+      }
+      // compare the token with the one in the password reset tokens table
+      const isTokenValid = await this.verifyResetToken(
+        token,
+        resetPasswordToken.token,
+      );
+      if (!isTokenValid) {
+        return {
+          message: ' The link to reset password has expired or is invalid',
+        };
+      }
+      // compare the time the token was created with the current time to check if it has expired
+      const ONE_HOUR = 60 * 60 * 1000; /* ms */
+      const isTokenExpired =
+        resetPasswordToken.createdAt.getTime() + ONE_HOUR < Date.now();
+      if (isTokenExpired) {
+        return {
+          message: 'Your link has expired, please request a new one',
+        };
+      }
+
+      // if token is valid, update the user password
+
+      const hash = await argon.hash(updatePinDto.pin);
+      await this.database.user.update({
+        where: { id: resetPasswordToken.userId },
+        data: { pin: hash },
+      });
+      return { message: 'User pin updated successfully' };
+    } catch (error) {
+      return {
+        message: ' The Pin update failed, please try again',
+      };
+    }
   }
   async signToken(userId: number, email: string) {
     const payload = { sub: userId, email };
