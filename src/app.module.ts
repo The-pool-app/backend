@@ -6,11 +6,18 @@ import { JobModule } from './job/job.module';
 import { ConfigModule } from '@nestjs/config';
 import { NotificationModule } from './notification/notification.module';
 import { AppController } from './app.controller';
+import { ThrottlerModule } from '@nestjs/throttler';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 10,
+      },
+    ]),
     AuthModule,
     UserModule,
     DatabaseModule,
