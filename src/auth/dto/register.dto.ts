@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from '@prisma/client';
 import { IsEmail, IsEnum, IsNotEmpty, MinLength } from 'class-validator';
 
 // enum IGender {
@@ -18,7 +19,8 @@ export class RegisterDto {
   email: string;
 
   @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(['CANDIDATE', 'RECRUITER'])
-  role: string;
+  @IsEnum(['CANDIDATE', 'RECRUITER'], {
+    message: 'Role is either a CANDIDATE or a RECRUITER',
+  })
+  role: UserRole;
 }

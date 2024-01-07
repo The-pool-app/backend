@@ -1,5 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
+import {
+  workType,
+  ApplicantExperienceLevel,
+  jobDuration,
+} from '@prisma/client';
 
 export class CreateJobDto {
   @ApiProperty()
@@ -25,15 +30,19 @@ export class CreateJobDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  jobDuration: string;
+  jobDuration: jobDuration;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  workType: string;
+  workType: workType;
 
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  experience: string;
+  experience: ApplicantExperienceLevel;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  salaryRange: string;
 }

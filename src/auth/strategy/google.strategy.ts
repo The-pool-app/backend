@@ -32,7 +32,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       picture: photos[0].value,
       accessToken,
     };
-    const existingUser = await this.database.user.findUnique({
+    const existingUser = await this.database.personal_details.findUnique({
       where: { email: user.email },
     });
     if (!existingUser) {

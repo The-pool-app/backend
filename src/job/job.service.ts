@@ -16,7 +16,6 @@ export class JobService {
     return this.database.job.findMany({
       where: {
         postedById: userId,
-        title: options.search,
       },
       take: parseInt(limit as any),
       skip: offset,
@@ -33,8 +32,16 @@ export class JobService {
   async createJob(userId: number, dto: CreateJobDto) {
     await this.database.job.create({
       data: {
-        postedById: userId,
-        ...dto,
+        jobDetails: {
+          create: {
+            ...dto,
+          },
+        },
+        postedBy: {
+          connect: {
+            id: userId,
+          },
+        },
       },
     });
     return { message: 'Job created successfully' };
@@ -52,7 +59,13 @@ export class JobService {
       where: {
         id: jobId,
       },
-      data: dto,
+      data: {
+        jobDetails: {
+          update: {
+            ...dto,
+          },
+        },
+      },
     });
     return { message: 'Job updated successfully' };
   }

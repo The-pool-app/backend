@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class DatabaseService extends PrismaClient {
-  constructor(config: ConfigService) {
+  constructor(private config: ConfigService) {
     super({
       datasources: {
         db: {
@@ -14,6 +14,23 @@ export class DatabaseService extends PrismaClient {
     });
   }
   cleanDb() {
-    return this.$transaction([this.job.deleteMany(), this.user.deleteMany()]);
+    // return this.$executeRaw`DROP SCHEMA IF EXISTS public CASCADE`;
+    return this.$transaction([
+      this.applicant_status.deleteMany(),
+      this.company.deleteMany(),
+      this.education.deleteMany(),
+      this.job_details.deleteMany(),
+      this.messages.deleteMany(),
+      this.role.deleteMany(),
+      this.passwordResetToken.deleteMany(),
+      this.work_experience.deleteMany(),
+      this.personal_details.deleteMany(),
+      this.professional_details.deleteMany(),
+      this.subscription_type.deleteMany(),
+      this.subscription.deleteMany(),
+      this.job.deleteMany(),
+      this.user_activities.deleteMany(),
+      this.user.deleteMany(),
+    ]);
   }
 }

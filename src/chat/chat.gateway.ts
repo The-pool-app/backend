@@ -8,7 +8,7 @@ import { CreateChatDto } from './dto/create-chat.dto';
 import { UpdateChatDto } from './dto/update-chat.dto';
 import { UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guard';
+import { JwtAuthGuard } from '../auth/guard';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Chat')

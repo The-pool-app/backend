@@ -10,7 +10,6 @@ services:
     container_name: server
     depends_on:
       - dev_db
-      - mailhog
   dev_db:
     image: postgres:15.0
     container_name: dev_db
@@ -19,25 +18,19 @@ services:
       - POSTGRES_USER=dev
       - POSTGRES_DB=dev_db
     ports:
-      - '4500:5432'
+      - '3500:5432'
     volumes:
       - postgresDB_dev:/var/lib/postgresql/data
-  mailhog:
-    image: mailhog/mailhog
-    container_name: mailhog
-    ports:
-      - '8025:8025'
-      - '1025:1025'
 
   test-db:
     image: postgres:15.0
-    container_name: test-db
+    container_name: test-DB
     environment:
       - POSTGRES_PASSWORD=test123
       - POSTGRES_USER=test
-      - POSTGRES_DB=test_db
+      - POSTGRES_DB=test_DB
     ports:
-      - '4501:5432'
+      - '3501:5432'
     volumes:
       - postgresDB_test:/var/lib/postgresql/data
 

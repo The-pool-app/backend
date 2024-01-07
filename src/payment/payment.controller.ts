@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { ApiTags } from '@nestjs/swagger';
-import { JwtAuthGuard } from 'src/auth/guard';
+import { JwtAuthGuard } from '../auth/guard';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment')

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { DatabaseService } from '../database/database.service';
 import * as argon from 'argon2';
@@ -22,24 +26,28 @@ export class AuthService {
     try {
       const user = await this.database.user.create({
         data: {
-          email: dto.email,
-          pin: hash,
-          role: dto.role as UserRole, // Cast dto.role to UserRole
+          userDetail: {
+            create: {
+              email: dto.email,
+              pin: hash,
+            },
+          },
+          roleId: dto.role as UserRole,
         },
       });
-      const token = await this.signToken(user.id, user.email);
+      const token = await this.signToken(user.id, dto.email);
       await this.notification.sendMailWithResend(
-        user.email,
+        dto.email,
         'Welcome to the pool',
         `<h1>Welcome to the pool</h1><p>Hi ${
-          user.email
+          dto.email
         },</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
         your magic link is <a href="${this.config.get(
           'BASE_URL',
         )}/auth/magic-link?token=${token}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
       );
-      return { message: 'User created successfully', token };
+      return { message: 'Magic link sent to email', token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -65,8 +73,10 @@ export class AuthService {
     };
   }
   async login(loginDto: LoginDto) {
-    const user = await this.database.user.findUnique({
-      where: { email: loginDto.email },
+    const user = await this.database.personal_details.findUnique({
+      where: {
+        email: loginDto.email,
+      },
     });
     if (!user) {
       throw new ForbiddenException('Invalid credentials');
@@ -75,11 +85,11 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new ForbiddenException('Invalid credentials');
     }
-    const token = await this.signToken(user.id, user.email);
+    const token = await this.signToken(user.userId, user.email);
     return { message: 'User login successfully', token };
   }
   async forgotPin(resetPasswordDto: ForgotPasswordDto) {
-    const user = await this.database.user.findUnique({
+    const user = await this.database.personal_details.findUnique({
       where: { email: resetPasswordDto.email },
     });
     if (!user) {
@@ -88,20 +98,20 @@ export class AuthService {
       };
     }
     const resetToken = this.createResetToken();
-    const hash = await this.hashResetToken(resetToken);
+    console.log('resetToken:', resetToken);
+    // const hash = await this.hashResetToken(resetToken);
     await this.database.passwordResetToken.create({
       data: {
-        token: hash,
-        userId: user.id,
+        token: resetToken,
+        userId: user.userId,
       },
     });
-    // add token to headars of response
 
     await this.notification.sendMailWithResend(
       user.email,
       'Password Reset Request',
       `<p>Hi ${
-        user.firstName
+        user.email
       },</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
         the link is <a href="${this.config.get(
           'BASE_URL',
@@ -110,55 +120,72 @@ export class AuthService {
     );
     return {
       message: 'Link to reset password have been sent to provided email',
+      resetToken,
     };
   }
   async updatePin(updatePinDto: UpdatePinDto, token: string) {
     try {
-      if (updatePinDto.pin !== updatePinDto.confirmPin)
-        throw new ForbiddenException('Pin does not match');
-
-      // get the reset password token from url params
+      console.log('updatePinDto:', updatePinDto, 'token:', token);
+      const hashedToken = await this.hashResetToken(token);
       const resetPasswordToken =
-        await this.database.passwordResetToken.findUnique({
-          where: { token },
+        await this.database.passwordResetToken.findFirst({
+          where: { token: hashedToken },
         });
-      if (!resetPasswordToken) {
-        return {
-          message: ' The link to reset password has expired or is invalid',
-        };
-      }
-      // compare the token with the one in the password reset tokens table
-      const isTokenValid = await this.verifyResetToken(
-        token,
+      console.log(
+        'resetPasswordToken:',
         resetPasswordToken.token,
+        'hashedToken:',
+        hashedToken,
       );
-      if (!isTokenValid) {
-        return {
-          message: ' The link to reset password has expired or is invalid',
-        };
+      if (!resetPasswordToken) {
+        throw new ForbiddenException('Invalid password reset token');
       }
-      // compare the time the token was created with the current time to check if it has expired
-      const ONE_HOUR = 60 * 60 * 1000; /* ms */
-      const isTokenExpired =
-        resetPasswordToken.createdAt.getTime() + ONE_HOUR < Date.now();
-      if (isTokenExpired) {
-        return {
-          message: 'Your link has expired, please request a new one',
-        };
-      }
+      const TOKEN_EXPIRY_DURATION = 60 * 60 * 1000; /* ms */
+      return this.database.$transaction(async (tx) => {
+        // check if token has expired
+        // if expired, delete the token and return error message
+        // if not expired, update the user password and return success message
+        // delete the token
+        const deleteAllTokenForAUser = () =>
+          tx.passwordResetToken.deleteMany({
+            where: { userId: resetPasswordToken.userId },
+          });
+        const allTokensForUser = await tx.passwordResetToken.findMany({
+          where: { userId: resetPasswordToken.userId },
+        });
+        let matchedRow: { token: string; userId: number; createdAt: Date };
+        for (const row of allTokensForUser) {
+          if (row.token === hashedToken) {
+            matchedRow = row;
+          }
+        }
+        if (!matchedRow) {
+          throw new ForbiddenException('Invalid password reset token');
+        }
+        deleteAllTokenForAUser();
 
-      // if token is valid, update the user password
+        const tokenExpiryTime =
+          matchedRow.createdAt.getTime() + TOKEN_EXPIRY_DURATION;
 
-      const hash = await argon.hash(updatePinDto.pin);
-      await this.database.user.update({
-        where: { id: resetPasswordToken.userId },
-        data: { pin: hash },
+        console.log(
+          `tokenTime: ${tokenExpiryTime}, current time: ${Date.now()}, diff: ${
+            tokenExpiryTime - Date.now()
+          }`,
+        );
+        if (tokenExpiryTime < Date.now()) {
+          throw new ForbiddenException('The token has expired');
+        }
+
+        const hash = await argon.hash(updatePinDto.pin);
+        await this.database.personal_details.update({
+          where: { userId: matchedRow.userId },
+          data: { pin: hash },
+        });
+        return { message: 'User pin updated successfully' };
       });
-      return { message: 'User pin updated successfully' };
     } catch (error) {
-      return {
-        message: ' The Pin update failed, please try again',
-      };
+      console.log('error:', error);
+      throw new BadRequestException('The Pin update failed, please try again');
     }
   }
   async signToken(userId: number, email: string) {

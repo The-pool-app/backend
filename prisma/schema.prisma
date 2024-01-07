@@ -46,12 +46,23 @@ enum Gender {
 }
 
 model subscription_type {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           Int            @id @default(autoincrement())
+  name         String
+  description  String
+  price        Float
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  subscription subscription[]
+}
+
+model subscription {
+  id                 Int                @id @default(autoincrement())
+  userId             Int
+  subscriptionTypeId Int
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  user               User               @relation(fields: [userId], references: [id])
+  subscription_type  subscription_type? @relation(fields: [subscriptionTypeId], references: [id])
 }
 
 model messages {
@@ -69,7 +80,8 @@ model job_details {
   workType       workType
   jobDuration    jobDuration
   experience     ApplicantExperienceLevel
-  Job            Job[]
+  salaryRange    String
+  Job            Job?                     @relation(fields: [jobId], references: [id])
 }
 
 model company {
@@ -82,21 +94,20 @@ model company {
 model User {
   id                 Int                  @id @default(autoincrement())
   roleId             UserRole             @default(CANDIDATE)
-  subscriptionTypeId Int
   userDetail         personal_details?
   activities         user_activities[]
   education          education[]
   work_experience    work_experience[]
   PasswordResetToken PasswordResetToken[]
   jobs               Job[]
+  subscription       subscription[]
 }
 
 model Job {
-  id               Int         @id @default(autoincrement())
-  postedById       Int
-  postedBy         User        @relation(fields: [postedById], references: [id])
-  jobDetails       job_details @relation(fields: [job_detailsJobId], references: [jobId])
-  job_detailsJobId Int         @unique
+  id         Int          @id @default(autoincrement())
+  jobDetails job_details?
+  postedById Int
+  postedBy   User         @relation(fields: [postedById], references: [id])
 }
 
 model PasswordResetToken {
@@ -118,7 +129,7 @@ model education {
 }
 
 model work_experience {
-  userId                     Int 
+  userId                     Int
   user                       User                  @relation(fields: [userId], references: [id])
   companyName                String                @id
   jobTitle                   String
@@ -136,19 +147,19 @@ model user_activities {
 }
 
 model personal_details {
-  userId                Int      @unique
-  email                 String   @id @unique
+  userId                Int       @unique
+  email                 String    @id @unique
   pin                   String
-  firstName             String
-  lastName              String
-  phoneNumber           String
-  sex                   Gender
-  dateOfBirth           DateTime
-  meansOfIdentification String
-  profilePicture        String
-  profileVideo          String
-  createdAt             DateTime @default(now())
-  user                  User     @relation(fields: [userId], references: [id])
+  firstName             String?
+  lastName              String?
+  phoneNumber           String?
+  sex                   Gender?
+  dateOfBirth           DateTime?
+  meansOfIdentification String?
+  profilePicture        String?
+  profileVideo          String?
+  createdAt             DateTime  @default(now())
+  user                  User      @relation(fields: [userId], references: [id])
 }
 
 model applicant_status {
@@ -168,7 +179,7 @@ model professional_details {
   jobRole             String
   yearsOfExperience   Int
   professionalSummary String
-  jobPreference       workType                @default(REMOTE)
+  jobPreference       workType                 @default(REMOTE)
   skills              String[]
   interests           String[]
   salaryRange         String
