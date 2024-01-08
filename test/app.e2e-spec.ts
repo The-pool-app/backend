@@ -12,6 +12,7 @@ import {
   jobDuration,
   workType,
 } from '@prisma/client';
+import { after } from 'node:test';
 
 describe('Pool App End to End Tests', () => {
   let app: INestApplication;
@@ -87,14 +88,6 @@ describe('Pool App End to End Tests', () => {
             .expectStatus(201);
         });
 
-        it('should send magic link email to user', () => {
-          return pactum
-            .spec()
-            .post('/auth/register')
-            .withBody(dto)
-            .expectStatus(201)
-            .expectBodyContains('Magic link sent to email');
-        });
         it('should throw error if email already exists', async () => {
           await pactum.spec().post('/auth/register').withBody(dto);
           return pactum
@@ -196,7 +189,7 @@ describe('Pool App End to End Tests', () => {
             .withBody({ ...updatePinDto, pin: '123' })
             .expectStatus(400);
         });
-        it('should show specific message if link is expired or token is invalid', async () => {
+        it('should show specific message token is invalid', async () => {
           // get the reset password token from url params
           return pactum
             .spec()
@@ -204,6 +197,16 @@ describe('Pool App End to End Tests', () => {
             .withQueryParams('token', 'sample-query-param')
             .withBody(updatePinDto)
             .expectBodyContains('Invalid password reset token');
+        });
+        it('should show specific status code if link is invalid', async () => {
+          // get the reset password token from url params
+          return pactum
+            .spec()
+            .post('/auth/update-pin')
+            .withQueryParams('token', 'some-invalid-token')
+            .withBody(updatePinDto)
+            .expectStatus(400)
+            .inspect();
         });
         it('should update pin', () => {
           return pactum

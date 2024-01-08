@@ -10,7 +10,7 @@ import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from '../notification/mail/mail.service';
-import { randomBytes } from 'crypto';
+import { randomBytes, createHash } from 'crypto';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -98,8 +98,7 @@ export class AuthService {
       };
     }
     const resetToken = this.createResetToken();
-    console.log('resetToken:', resetToken);
-    // const hash = await this.hashResetToken(resetToken);
+
     await this.database.passwordResetToken.create({
       data: {
         token: resetToken,
@@ -124,56 +123,44 @@ export class AuthService {
     };
   }
   async updatePin(updatePinDto: UpdatePinDto, token: string) {
+    // get the token and hash it, then check if it exists in the database
+    // if it does not exist, return error message that the token is invalid
+    // if it exists, check if it has expired
+    // if it has expired, return error message that the token has expired
+    // if it has not expired, update the user password and return success message
+    // delete the token
     try {
-      console.log('updatePinDto:', updatePinDto, 'token:', token);
-      const hashedToken = await this.hashResetToken(token);
+      if (updatePinDto.pin !== updatePinDto.confirmPin) {
+        throw new BadRequestException('The pin does not match');
+      }
       const resetPasswordToken =
-        await this.database.passwordResetToken.findFirst({
-          where: { token: hashedToken },
+        await this.database.passwordResetToken.findUnique({
+          where: { token },
         });
-      console.log(
-        'resetPasswordToken:',
-        resetPasswordToken.token,
-        'hashedToken:',
-        hashedToken,
-      );
       if (!resetPasswordToken) {
-        throw new ForbiddenException('Invalid password reset token');
+        throw new BadRequestException('Invalid password reset token');
       }
       const TOKEN_EXPIRY_DURATION = 60 * 60 * 1000; /* ms */
+      const tokenExpiryTime =
+        resetPasswordToken.createdAt.getTime() + TOKEN_EXPIRY_DURATION;
+      if (tokenExpiryTime < Date.now()) {
+        throw new BadRequestException('The token has expired');
+      }
       return this.database.$transaction(async (tx) => {
-        // check if token has expired
-        // if expired, delete the token and return error message
-        // if not expired, update the user password and return success message
-        // delete the token
-        const deleteAllTokenForAUser = () =>
-          tx.passwordResetToken.deleteMany({
-            where: { userId: resetPasswordToken.userId },
-          });
         const allTokensForUser = await tx.passwordResetToken.findMany({
           where: { userId: resetPasswordToken.userId },
         });
         let matchedRow: { token: string; userId: number; createdAt: Date };
         for (const row of allTokensForUser) {
-          if (row.token === hashedToken) {
+          if (row.token === token) {
             matchedRow = row;
           }
         }
         if (!matchedRow) {
-          throw new ForbiddenException('Invalid password reset token');
-        }
-        deleteAllTokenForAUser();
-
-        const tokenExpiryTime =
-          matchedRow.createdAt.getTime() + TOKEN_EXPIRY_DURATION;
-
-        console.log(
-          `tokenTime: ${tokenExpiryTime}, current time: ${Date.now()}, diff: ${
-            tokenExpiryTime - Date.now()
-          }`,
-        );
-        if (tokenExpiryTime < Date.now()) {
-          throw new ForbiddenException('The token has expired');
+          await tx.passwordResetToken.deleteMany({
+            where: { userId: resetPasswordToken.userId },
+          });
+          throw new BadRequestException('Invalid password reset token');
         }
 
         const hash = await argon.hash(updatePinDto.pin);
@@ -181,11 +168,13 @@ export class AuthService {
           where: { userId: matchedRow.userId },
           data: { pin: hash },
         });
+        tx.passwordResetToken.deleteMany({
+          where: { userId: resetPasswordToken.userId },
+        });
         return { message: 'User pin updated successfully' };
       });
     } catch (error) {
-      console.log('error:', error);
-      throw new BadRequestException('The Pin update failed, please try again');
+      throw new BadRequestException(error.message);
     }
   }
   async signToken(userId: number, email: string) {
@@ -197,8 +186,7 @@ export class AuthService {
     return access_token;
   }
   async hashResetToken(token: string) {
-    const hash = await argon.hash(token);
-    return hash;
+    return createHash(token).digest('hex');
   }
   createResetToken(length: number = 32) {
     const token = randomBytes(length).toString('hex');
@@ -206,7 +194,7 @@ export class AuthService {
   }
 
   async verifyResetToken(token: string, hash: string) {
-    const isTokenValid = await argon.verify(hash, token);
-    return isTokenValid;
+    const hashedToken = await this.hashResetToken(token);
+    return hashedToken === hash;
   }
 }
