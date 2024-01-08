@@ -4,17 +4,28 @@ import { UpdatePersonalDetailsDto } from './dto';
 
 @Injectable()
 export class UserService {
-  constructor(private database: DatabaseService) { }
+  constructor(private database: DatabaseService) {}
   updatePersonalDetails(userId: number, dto: UpdatePersonalDetailsDto) {
     try {
-      return this.database.personal_details.update({
-        where: { userId },
+      return this.database.user.update({
+        where: { id: userId },
         data: {
-          dateOfBirth: dto.dateOfBirth,
-          firstName: dto.firstName,
-          lastName: dto.lastName,
-          phoneNumber: dto.phoneNumber,
-          sex: dto.sex,
+          userDetail: {
+            update: {
+              dateOfBirth: dto.dateOfBirth,
+              firstName: dto.firstName,
+              lastName: dto.lastName,
+              phoneNumber: dto.phoneNumber,
+              sex: dto.sex,
+            },
+          },
+          professional_details: {
+            create: {
+              userId: userId,
+              jobRole: dto.jobRole,
+              yearsOfExperience: dto.yearsOfExperience,
+            },
+          },
         },
       });
     } catch (error) {

@@ -92,15 +92,17 @@ model company {
 }
 
 model User {
-  id                 Int                  @id @default(autoincrement())
-  roleId             UserRole             @default(CANDIDATE)
-  userDetail         personal_details?
-  activities         user_activities[]
-  education          education[]
-  work_experience    work_experience[]
-  PasswordResetToken PasswordResetToken[]
-  jobs               Job[]
-  subscription       subscription[]
+  id                         Int                   @id @default(autoincrement())
+  roleId                     UserRole              @default(CANDIDATE)
+  userDetail                 personal_details?
+  activities                 user_activities[]
+  education                  education[]
+  work_experience            work_experience[]
+  PasswordResetToken         PasswordResetToken[]
+  jobs                       Job[]
+  subscription               subscription[]
+  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
+  professional_detailsUserId Int?
 }
 
 model Job {
@@ -162,11 +164,6 @@ model personal_details {
   user                  User      @relation(fields: [userId], references: [id])
 }
 
-model applicant_status {
-  id   Int             @id @default(autoincrement())
-  name ApplicantStatus @default(NOT_LOOKING)
-}
-
 model role {
   id          Int    @id @default(autoincrement())
   name        String
@@ -175,17 +172,18 @@ model role {
 
 model professional_details {
   userId              Int                      @id
-  statusId            Int
-  jobRole             String
+  status              ApplicantStatus          @default(NOT_LOOKING)
+  jobRole             String?
   yearsOfExperience   Int
-  professionalSummary String
+  professionalSummary String?
   jobPreference       workType                 @default(REMOTE)
   skills              String[]
   interests           String[]
-  salaryRange         String
-  experienceLevel     ApplicantExperienceLevel
-  highestEducation    String
+  salaryRange         String?
+  experienceLevel     ApplicantExperienceLevel @default(JUNIOR)
+  highestEducation    String?
   education           education[]
   allWorkExperience   work_experience[]
   createdAt           DateTime                 @default(now())
+  User                User[]
 }

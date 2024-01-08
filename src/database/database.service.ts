@@ -16,7 +16,6 @@ export class DatabaseService extends PrismaClient {
   cleanDb() {
     // return this.$executeRaw`DROP SCHEMA IF EXISTS public CASCADE`;
     return this.$transaction([
-      this.applicant_status.deleteMany(),
       this.company.deleteMany(),
       this.education.deleteMany(),
       this.job_details.deleteMany(),

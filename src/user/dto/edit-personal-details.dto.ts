@@ -35,4 +35,10 @@ export class UpdatePersonalDetailsDto {
 
   @ApiProperty()
   profileVideo?: string;
+
+  @ApiProperty()
+  jobRole?: string;
+
+  @ApiProperty()
+  yearsOfExperience?: number;
 }

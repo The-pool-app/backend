@@ -247,6 +247,8 @@ describe('Pool App End to End Tests', () => {
           phoneNumber: '08012345678',
           sex: 'MALE',
           dateOfBirth: '2007-03-01T13:00:00Z',
+          jobRole: 'Software Engineer',
+          yearsOfExperience: 3,
         };
         it('should throw error when body is empty', () => {
           return pactum
