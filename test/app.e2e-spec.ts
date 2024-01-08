@@ -4,7 +4,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { DatabaseService } from '../src/database/database.service';
 import * as pactum from 'pactum';
 import { LoginDto, RegisterDto, UpdatePinDto } from 'src/auth/dto';
-import { EditUserDto } from 'src/user/dto';
+import { UpdatePersonalDetailsDto } from 'src/user/dto';
 import { CreateJobDto, EditJobDto } from 'src/job/dto';
 import { MailService } from '../src/notification/mail/mail.service';
 import {
@@ -12,7 +12,6 @@ import {
   jobDuration,
   workType,
 } from '@prisma/client';
-import { after } from 'node:test';
 
 describe('Pool App End to End Tests', () => {
   let app: INestApplication;
@@ -205,8 +204,7 @@ describe('Pool App End to End Tests', () => {
             .post('/auth/update-pin')
             .withQueryParams('token', 'some-invalid-token')
             .withBody(updatePinDto)
-            .expectStatus(400)
-            .inspect();
+            .expectStatus(400);
         });
         it('should update pin', () => {
           return pactum
@@ -228,51 +226,51 @@ describe('Pool App End to End Tests', () => {
       });
     });
   });
-  // describe('User Module', () => {
-  //   describe('User Controller', () => {
-  //     describe('Get Current User', () => {
-  //       it('should throw error if no token is provided', () => {
-  //         return pactum.spec().get('/users/me').expectStatus(401);
-  //       });
-  //       it('return current user', () => {
-  //         return pactum
-  //           .spec()
-  //           .get('/users/me')
-  //           .withBearerToken('$S{userAt}')
-  //           .expectStatus(200);
-  //       });
-  //     });
-  //     describe('Update User Personal Details', () => {
-  //       const dto: EditUserDto = {
-  //         firstName: 'John',
-  //         lastName: 'Doe',
-  //         jobRole: ['Software Engineer'],
-  //         phoneNumber: '08012345678',
-  //         sex: 'Male',
-  //         dateOfBirth: '1999-01-01',
-  //       };
-  //       it('should throw error when body is empty', () => {
-  //         return pactum
-  //           .spec()
-  //           .patch('/users/me')
-  //           .withBearerToken('$S{userAt}')
-  //           .withBody({})
-  //           .expectStatus(400);
-  //       });
-  //       it('should update user', () => {
-  //         return pactum
-  //           .spec()
-  //           .patch('/users/me')
-  //           .withBearerToken('$S{userAt}')
-  //           .withBody(dto)
-  //           .expectStatus(400);
-  //       });
-  //     });
-  //     describe('Update User Professional details', () => {});
-  //     describe('Update User Education details', () => {});
-  //     describe('Update User Work Experience details', () => {});
-  //   });
-  // });
+  describe('User Module', () => {
+    describe('User Controller', () => {
+      describe('Get Current User', () => {
+        it('should throw error if no token is provided', () => {
+          return pactum.spec().get('/users/me').expectStatus(401);
+        });
+        it('return current user', () => {
+          return pactum
+            .spec()
+            .get('/users/me')
+            .withBearerToken('$S{userAt}')
+            .expectStatus(200);
+        });
+      });
+      describe('Update User Personal Details', () => {
+        const dto: UpdatePersonalDetailsDto = {
+          firstName: 'John',
+          lastName: 'Doe',
+          phoneNumber: '08012345678',
+          sex: 'MALE',
+          dateOfBirth: '2007-03-01T13:00:00Z',
+        };
+        it('should throw error when body is empty', () => {
+          return pactum
+            .spec()
+            .patch('/users/personal-details')
+            .withBearerToken('$S{userAt}')
+            .withBody({})
+            .expectStatus(400);
+        });
+        it('should update user', () => {
+          return pactum
+            .spec()
+            .patch('/users/personal-details')
+            .withBearerToken('$S{userAt}')
+            .withBody(dto)
+            .expectStatus(200)
+            .inspect();
+        });
+      });
+      describe('Update User Professional details', () => {});
+      describe('Update User Education details', () => {});
+      describe('Update User Work Experience details', () => {});
+    });
+  });
   // describe('Job Module', () => {
   //   describe('Job Controller', () => {
   //     const dto: CreateJobDto = {

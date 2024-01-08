@@ -1,1 +1,1 @@
-export * from './editUser.dto';
+export * from './edit-personal-details.dto';

@@ -1,17 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { EditUserDto } from './dto';
+import { UpdatePersonalDetailsDto } from './dto';
 
 @Injectable()
 export class UserService {
-  constructor(private database: DatabaseService) {}
-  updateProfile(userId: number, dto: EditUserDto) {
-    return this.database.user.update({
-      where: { id: userId },
-      data: {
-        ...dto,
-      },
-    });
+  constructor(private database: DatabaseService) { }
+  updatePersonalDetails(userId: number, dto: UpdatePersonalDetailsDto) {
+    try {
+      return this.database.personal_details.update({
+        where: { userId },
+        data: {
+          dateOfBirth: dto.dateOfBirth,
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          phoneNumber: dto.phoneNumber,
+          sex: dto.sex,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   deleteProfile(userId: number) {
     return this.database.$transaction([
