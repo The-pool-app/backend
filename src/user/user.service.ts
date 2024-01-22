@@ -4,7 +4,7 @@ import { UpdatePersonalDetailsDto } from './dto';
 
 @Injectable()
 export class UserService {
-  constructor(private database: DatabaseService) { }
+  constructor(private database: DatabaseService) {}
   async updatePersonalDetails(userId: number, dto: UpdatePersonalDetailsDto) {
     try {
       return this.database.user.update({
