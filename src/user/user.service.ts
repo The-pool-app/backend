@@ -87,7 +87,6 @@ export class UserService {
               phoneNumber: dto.phoneNumber,
               sex: dto.sex,
               meansOfIdentification: dto.meansOfIdentification,
-              profilePicture: dto.profilePicture,
             },
           },
           professional_details: {
