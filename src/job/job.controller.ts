@@ -78,4 +78,23 @@ export class JobController {
   ) {
     return this.jobService.deleteJobById(userId, jobId);
   }
+  @Get('job-board')
+  getJobBoard(
+    @GetUser('id') userId: number,
+    @Query('limit') limit?: number,
+    @Query('offset') offset?: number,
+    @Query('search') search?: string,
+    @Query('experience') experience?: string,
+    @Query('workType') workType?: string,
+    @Query('jobDuration') jobDuration?: string,
+  ) {
+    return this.jobService.getJobBoard({
+      limit: limit || 10,
+      offset,
+      search,
+      experience,
+      workType,
+      jobDuration,
+    });
+  }
 }

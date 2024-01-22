@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -10,7 +11,37 @@ import { JobSearchOptions } from './dto';
 @Injectable()
 export class JobService {
   constructor(private database: DatabaseService) {}
-
+  getJobBoard({ limit, offset, search, experience, workType, jobDuration }) {
+    // get all jobs that are not expired
+    // get all jobs that are not filled
+    // get all jobs that are not deleted
+    // get all jobs that are not draft
+    // get all jobs that are not private
+    try {
+      return this.database.job.findMany({
+        where: {
+          jobDetails: {
+            title: {
+              contains: search,
+            },
+            experience: {
+              equals: experience,
+            },
+            workType: {
+              equals: workType,
+            },
+            jobDuration: {
+              equals: jobDuration,
+            },
+          },
+        },
+        take: parseInt(limit as any),
+        skip: offset,
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
   async getJobs(userId: number, options: JobSearchOptions) {
     const { limit, offset } = options;
     return this.database.job.findMany({
