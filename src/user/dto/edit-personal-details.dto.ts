@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 import { Gender } from '@prisma/client';
 
@@ -32,10 +32,11 @@ export class UpdatePersonalDetailsDto {
   meansOfIdentification?: string;
 
   @ApiProperty()
-  @IsNotEmpty()
+  @IsOptional()
   profilePicture?: string;
 
   @ApiProperty()
+  @IsOptional()
   profileVideo?: string;
 
   @ApiProperty()

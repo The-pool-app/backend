@@ -53,4 +53,32 @@ export class UserController {
   uploadVideo(@GetUser('userId') userId: number, @UploadedFile() file) {
     return this.userService.uploadVideo(userId, file);
   }
+  @Post('skills')
+  addSkills(@GetUser('userId') userId: number, @Body() dto) {
+    return this.userService.addSkills(userId, dto);
+  }
+
+  @Post('education')
+  addEducation(@GetUser('userId') userId: number, @Body() dto) {
+    return this.userService.addEducation(userId, dto);
+  }
+
+  @Post('work-experience')
+  addWorkExperience(@GetUser('userId') userId: number, @Body() dto) {
+    return this.userService.addWorkExperience(userId, dto);
+  }
+
+  @Post('profile-picture')
+  @UseInterceptors(FileInterceptor('file'))
+  uploadProfilePicture(
+    @GetUser('userId') userId: number,
+    @UploadedFile() file,
+  ) {
+    return this.userService.uploadProfilePicture(userId, file);
+  }
+
+  @Post('interests')
+  addInterests(@GetUser('userId') userId: number, @Body() dto) {
+    return this.userService.addInterests(userId, dto);
+  }
 }
