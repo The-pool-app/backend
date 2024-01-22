@@ -20,7 +20,7 @@ export class UpdatePersonalDetailsDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  @IsEnum(Gender, { message: 'Gender call only be male or female' })
+  @IsEnum(Gender, { message: 'Gender call only be MALE or FEMALE' })
   sex: Gender;
 
   @ApiProperty()
@@ -28,17 +28,21 @@ export class UpdatePersonalDetailsDto {
   dateOfBirth?: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   meansOfIdentification?: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   profilePicture?: string;
 
   @ApiProperty()
   profileVideo?: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   jobRole?: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   yearsOfExperience?: number;
 }

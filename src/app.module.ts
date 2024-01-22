@@ -9,6 +9,8 @@ import { AppController } from './app.controller';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
+import { DevtoolsModule } from '@nestjs/devtools-integration';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,6 +22,9 @@ import { PaymentModule } from './payment/payment.module';
         limit: 10,
       },
     ]),
+    DevtoolsModule.register({
+      http: process.env.NODE_ENV !== 'production',
+    }),
     AuthModule,
     UserModule,
     DatabaseModule,
