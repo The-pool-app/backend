@@ -10,8 +10,10 @@ import {
 import { CloudinaryService } from './cloudinary.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('videos')
+@Controller('media')
+@ApiTags('media-files')
 export class CloudinaryController {
   constructor(private readonly cloudinaryService: CloudinaryService) {}
   @Post('upload')

@@ -36,16 +36,15 @@ export class AuthService {
         },
       });
       const token = await this.signToken(user.id, dto.email);
-      await this.notification.sendMailWithResend(
+      await this.notification.sendMailWithMailJet(
         dto.email,
         'Welcome to the pool',
-        `<h1>Welcome to the pool</h1><p>Hi ${
-          dto.email
-        },</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
-        your magic link is <a href="${this.config.get(
-          'BASE_URL',
-        )}/auth/magic-link?token=${token}"> here</a>
-        </p><p>Regards,</p><p>The pool team</p>`,
+        `<div>
+        <h1>Welcome to the pool</h1>
+        <p>Hi ${dto.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
+        your magic link is <a href="com.thepool.join/auth/magic-link?token=${token}"> here</a>
+        </p><p>Regards,</p><p>The pool team</p>
+        </div>`,
       );
       return { message: 'Magic link sent to email', token };
     } catch (error) {
