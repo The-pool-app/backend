@@ -41,8 +41,8 @@ export class AuthService {
         'Welcome to the pool',
         `<div>
         <h1>Welcome to the pool</h1>
-        <p>Hi ${dto.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p><p>
-        your magic link is <a href="com.thepool.join://auth/magic-link?token=${token}"> here</a>
+        <p>Hi ${dto.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p>
+        <p> your magic link is <button> <a href="https://com.thepool.join://auth/magic-link?token=${token}">Here</a></button>
         </p><p>Regards,</p><p>The pool team</p>
         </div>`,
       );

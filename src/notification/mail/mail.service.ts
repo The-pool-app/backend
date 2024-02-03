@@ -5,7 +5,7 @@ import { Client, SendEmailV3_1, LibraryResponse } from 'node-mailjet';
 
 @Injectable()
 export class MailService {
-  constructor(private config: ConfigService) { }
+  constructor(private config: ConfigService) {}
   async sendMailWithResend(to: string, subject: string, html: string) {
     const resend = new Resend(this.config.get('RESEND_API_KEY'));
     const { data, error } = await resend.emails.send({
