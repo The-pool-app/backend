@@ -32,12 +32,11 @@ export class MailService {
         {
           From: {
             Email: 'abdulsalamlukmon9@gmail.com',
-            Name: 'ThePool',
+            Name: 'Osita from ThePool',
           },
           To: [
             {
               Email: to,
-              Name: 'Jaiye from ThePool',
             },
           ],
           // TemplateErrorReporting: {
@@ -58,7 +57,7 @@ export class MailService {
     const { Status } = result.body.Messages[0];
     if (Status) {
       console.log(' Sending mail with mailjet successful');
-      console.log(result.body);
+      // console.log(result.body);
       return;
     }
     console.log(' Sending mail with mailjet not successful');
