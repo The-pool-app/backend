@@ -10,6 +10,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { DevtoolsModule } from '@nestjs/devtools-integration';
     NotificationModule,
     PaymentModule,
     ChatModule,
+    AdminModule,
   ],
   controllers: [AppController],
 })

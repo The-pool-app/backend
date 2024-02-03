@@ -24,7 +24,7 @@ import {
 @ApiTags('Users')
 @Controller('users')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService) { }
   @Get('me')
   getMe(@GetUser('') user: User) {
     return user;
@@ -50,8 +50,11 @@ export class UserController {
   }
   @Post('upload-video')
   @UseInterceptors(FileInterceptor('file'))
-  uploadVideo(@GetUser('userId') userId: number, @UploadedFile() file) {
-    return this.userService.uploadVideo(userId, file);
+  uploadVideo(
+    @GetUser('userId') userId: number,
+    @UploadedFile() videoFile: Express.Multer.File,
+  ) {
+    return this.userService.uploadVideo(userId, videoFile);
   }
   @Post('skills')
   addSkills(@GetUser('userId') userId: number, @Body() dto) {

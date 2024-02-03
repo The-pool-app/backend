@@ -411,4 +411,6 @@ describe('Pool App End to End Tests', () => {
   // });
   describe('Payment Module', () => {});
   describe('Chat Module', () => {});
+  describe('Notification Module', () => {});
+  describe('Admin Module', () => {});
 });

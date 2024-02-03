@@ -117,6 +117,9 @@ export class UserService {
       if (!user) {
         throw new BadRequestException('User not found');
       }
+      // store the video in a blob storage
+      // return the url
+      // update the user profile video field with the url
       return this.database.user.update({
         where: { id: userId },
         data: {
