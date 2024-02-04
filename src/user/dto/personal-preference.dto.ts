@@ -1,11 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {  IsEnum, ValidateIf } from 'class-validator';
+import {
+  ApplicantExperienceLevel,
+  workType,
+  ApplicantStatus,
+} from '@prisma/client';
+import { SalaryDto } from './salary-range.dto';
 
 export class PersonalPreferenceDto {
   @ApiProperty()
-  salaryRange: string;
+  salaryRange: SalaryDto;
 
   @ApiProperty()
-  workExperience: string;
+  @IsEnum(['JUNIOR', 'MID_LEVEL', 'SENIOR'], {
+    message: 'experience level can only be JUNIOR, SENIOR or a MID_LEVEL',
+  })
+  experienceLevel: ApplicantExperienceLevel;
 
   @ApiProperty()
   highestEducation: string;
@@ -14,8 +24,15 @@ export class PersonalPreferenceDto {
   location: string;
 
   @ApiProperty()
-  preferredJobType: string;
+  @IsEnum(['REMOTE', 'ONSITE', 'HYBRID'], {
+    message: 'work type can only be REMOTE, ONSITE or HYBRID',
+  })
+  preferredJobType: workType;
 
   @ApiProperty()
-  status: string;
+  @IsEnum(['ACTIVELY_LOOKING', 'NOT_LOOKING', 'OPEN_TO_OFFERS'], {
+    message: 'status can only be ACTIVE, NOT_LOOKING or OPEN_TO_OFFERS',
+  })
+  status: ApplicantStatus;
 }
+

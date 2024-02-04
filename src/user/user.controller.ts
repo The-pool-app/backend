@@ -13,6 +13,7 @@ import { GetUser } from '../auth/decorator';
 import { JwtAuthGuard } from '../auth/guard';
 import { User } from '@prisma/client';
 import {
+  PersonalPreferenceDto,
   UpdatePersonalDetailsDto,
   VideoFileUploadDto,
   profilePictureUploadDto,
@@ -72,6 +73,14 @@ export class UserController {
   @Post('education')
   addEducation(@GetUser('userId') userId: number, @Body() dto) {
     return this.userService.addEducation(userId, dto);
+  }
+
+  @Post('personal-preferences')
+  addPersonalPreferences(
+    @GetUser('userId') userId: number,
+    @Body() dto: PersonalPreferenceDto,
+  ) {
+    return this.userService.addPersonalPreferences(userId, dto);
   }
 
   @Post('work-experience')

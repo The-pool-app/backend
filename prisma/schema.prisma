@@ -155,6 +155,7 @@ model personal_details {
   firstName             String?
   lastName              String?
   phoneNumber           String?
+  location              String?
   sex                   Gender?
   dateOfBirth           DateTime?
   meansOfIdentification String?

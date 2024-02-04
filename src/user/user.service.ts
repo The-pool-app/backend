@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { UpdatePersonalDetailsDto, profilePictureUploadDto } from './dto';
+import { PersonalPreferenceDto, UpdatePersonalDetailsDto, profilePictureUploadDto } from './dto';
 import { CloudinaryService } from './media/cloudinary.service';
 
 @Injectable()
@@ -8,7 +8,34 @@ export class UserService {
   constructor(
     private database: DatabaseService,
     private videoServer: CloudinaryService,
-  ) {}
+  ) { }
+
+  async addPersonalPreferences(userId: number, dto: PersonalPreferenceDto) {
+    try {
+      await this.database.$transaction([
+       this.database.professional_details.update({
+        where: { userId: userId },
+        data: {
+          highestEducation: dto.highestEducation,
+          experienceLevel: dto.experienceLevel,
+          jobPreference: dto.preferredJobType,
+          status: dto.status,
+          salaryRange: JSON.stringify(dto.salaryRange),
+        },
+        
+      }),
+      this.database.personal_details.update({
+        where: { userId: userId },
+        data: {
+          location: dto.location,
+        },
+      }),
+      ]);
+      return { message: 'Personal preferences added successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   async addInterests(userId: number, dto: string[]) {
     try {
