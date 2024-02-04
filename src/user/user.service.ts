@@ -1,14 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { UpdatePersonalDetailsDto } from './dto';
+import { UpdatePersonalDetailsDto, profilePictureUploadDto } from './dto';
 
 @Injectable()
 export class UserService {
   constructor(private database: DatabaseService) {}
 
-  addInterests(userId: number, dto: any) {
+  async addInterests(userId: number, dto: any) {
     try {
-      return this.database.professional_details.update({
+      await this.database.professional_details.update({
         where: { userId: userId },
         data: {
           interests: {
@@ -16,34 +16,52 @@ export class UserService {
           },
         },
       });
+      return { message: 'Interests added successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-  uploadProfilePicture(userId: number, file: any) {
+  async uploadProfilePicture(
+    userId: number,
+    profileDto: profilePictureUploadDto,
+  ) {
     try {
-      return this.database.user.update({
+      const profilePicture = JSON.stringify(profileDto); // Convert profileDto to a string
+      if (!profileDto.file) {
+        throw new BadRequestException('Profile picture is required');
+      }
+      const mimeType = profileDto.file.mimetype;
+      if (!mimeType.includes('image')) {
+        throw new BadRequestException(
+          'Invalid file type. Only images are allowed',
+        );
+      }
+      await this.database.user.update({
         where: { id: userId },
         data: {
           userDetail: {
             update: {
-              profilePicture: file.path,
+              profilePicture: profilePicture, // Assign the string value to profilePicture field
             },
           },
         },
       });
+      return { message: 'Profile picture uploaded successfully' };
     } catch (error) {
-      throw new BadRequestException(error.message);
+      throw new BadRequestException(
+        'Invalid file type. Only PNG and JPEG are allowed',
+      );
     }
   }
-  addWorkExperience(userId: number, dto: any) {
+  async addWorkExperience(userId: number, dto: any) {
     try {
-      return this.database.work_experience.create({
+      await this.database.work_experience.create({
         data: {
           ...dto,
           userId: userId,
         },
       });
+      return { message: 'Work experience added successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
@@ -60,9 +78,9 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
-  addSkills(userId: number, dto: any) {
+  async addSkills(userId: number, dto: any) {
     try {
-      return this.database.professional_details.update({
+      await this.database.professional_details.update({
         where: { userId: userId },
         data: {
           skills: {
@@ -70,13 +88,14 @@ export class UserService {
           },
         },
       });
+      return { message: 'Skills added successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
   async updatePersonalDetails(userId: number, dto: UpdatePersonalDetailsDto) {
     try {
-      return this.database.user.update({
+      await this.database.user.update({
         where: { id: userId },
         data: {
           userDetail: {
@@ -98,19 +117,26 @@ export class UserService {
           },
         },
       });
+      return { message: 'Personal details updated successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-  deleteProfile(userId: number) {
-    return this.database.$transaction([
+  async deleteProfile(userId: number) {
+    await this.database.$transaction([
       this.database.job.deleteMany({ where: { postedById: userId } }),
       this.database.user.delete({ where: { id: userId } }),
     ]);
+    return { message: 'Profile deleted successfully' };
   }
 
   async uploadVideo(userId: number, file: Express.Multer.File) {
     try {
+      if (file.mimetype !== 'video/mp4') {
+        throw new BadRequestException(
+          'Invalid file type. Only videos are allowed',
+        );
+      }
       const user = await this.database.user.findUnique({
         where: { id: userId },
       });
@@ -120,7 +146,7 @@ export class UserService {
       // store the video in a blob storage
       // return the url
       // update the user profile video field with the url
-      return this.database.user.update({
+      await this.database.user.update({
         where: { id: userId },
         data: {
           userDetail: {
@@ -130,6 +156,7 @@ export class UserService {
           },
         },
       });
+      return { message: 'Video uploaded successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }

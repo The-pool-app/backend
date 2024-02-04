@@ -12,17 +12,21 @@ import {
 import { GetUser } from '../auth/decorator';
 import { JwtAuthGuard } from '../auth/guard';
 import { User } from '@prisma/client';
-import { UpdatePersonalDetailsDto } from './dto';
+import {
+  UpdatePersonalDetailsDto,
+  VideoFileUploadDto,
+  profilePictureUploadDto,
+} from './dto';
 import { UserService } from './user.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
-import { profile } from 'console';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Users')
+@ApiBearerAuth()
 @Controller('users')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -51,6 +55,11 @@ export class UserController {
   }
   @Post('upload-video')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a video file',
+    type: VideoFileUploadDto,
+  })
   uploadVideo(
     @GetUser('userId') userId: number,
     @UploadedFile() videoFile: Express.Multer.File,
@@ -74,9 +83,14 @@ export class UserController {
 
   @Post('profile-picture')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a profile picture',
+    type: profilePictureUploadDto,
+  })
   uploadProfilePicture(
     @GetUser('userId') userId: number,
-    @UploadedFile() profilePicture: Express.Multer.File,
+    @UploadedFile() profilePicture: profilePictureUploadDto,
   ) {
     return this.userService.uploadProfilePicture(userId, profilePicture);
   }
