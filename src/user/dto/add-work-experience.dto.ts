@@ -8,7 +8,7 @@ export class AddWorkExperienceDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  position: string;
+  title: string;
 
   @ApiProperty()
   @IsNotEmpty()
@@ -19,7 +19,7 @@ export class AddWorkExperienceDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  companyLocation: string;
+  location: string;
 
   @ApiProperty()
   @IsOptional()

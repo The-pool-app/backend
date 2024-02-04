@@ -28,11 +28,11 @@ export class UserService {
           data: dto.workExperience.map((experience) => ({
             userId: userId,
             companyName: experience.companyName,
-            position: experience.position,
+            position: experience.title,
             startDate: experience.startDate,
             endDate: experience.endDate,
             description: experience.description,
-            jobTitle: experience.position,
+            jobTitle: experience.title,
           })),
           skipDuplicates: true,
         }),
