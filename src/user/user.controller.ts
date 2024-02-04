@@ -80,9 +80,8 @@ export class UserController {
   }
 
   @Post('professional-details')
-  @ApiConsumes('multipart/form-data')
   @ApiBody({
-    description: 'Add professional details',
+    description: 'Add professional details to user profile',
     type: CreateCVDto,
   })
   addProfessionalDetails(
