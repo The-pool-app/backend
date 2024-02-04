@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Post,
   Query,
+  Redirect,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -52,4 +53,12 @@ export class AuthController {
   async updatePin(@Body() dto: UpdatePinDto, @Query('token') token: string) {
     return this.authService.updatePin(dto, token);
   }
+
+  @Get('magic-link/register')
+  @Redirect('com.thepool.join://auth/magic-link', HttpStatus.FOUND)
+  async registerRedirect() {}
+
+  @Get('magic-link/update-pin')
+  @Redirect('com.thepool.join://auth/update-pin', HttpStatus.FOUND)
+  async updatePinRedirect() {}
 }

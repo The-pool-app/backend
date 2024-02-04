@@ -20,7 +20,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private notification: MailService,
-  ) {}
+  ) { }
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
     try {
@@ -39,12 +39,20 @@ export class AuthService {
       await this.notification.sendMailWithMailJet(
         dto.email,
         'Welcome to the pool',
-        `<div>
-        <h1>Welcome to the pool</h1>
-        <p>Hi ${dto.email},</p><p>Thank you for joining us. </br> Please click the link below to verify your email address.</p>
-        <p> your magic link is <button> <a href="https://com.thepool.join://auth/magic-link?token=${token}">Here</a></button>
-        </p><p>Regards,</p><p>The pool team</p>
-        </div>`,
+        `
+       <div>
+       <p> Hi ${dto.email},<br/> Welcome to the pool</p>
+       <p>
+       Please click the link below to verify your email address.
+       your magic link is:<a href="https://pool-app-ss7a.onrender.com/auth/magic-link/register?token=${token}"> Here </a>
+       </p>
+        <br>
+        Thank you for joining us.
+        <br>
+       Regards,
+       The pool team.
+       </div>
+        `,
       );
       return { message: 'Magic link sent to email', token };
     } catch (error) {

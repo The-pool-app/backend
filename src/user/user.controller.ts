@@ -19,6 +19,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
+import { profile } from 'console';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Users')
@@ -57,7 +58,7 @@ export class UserController {
     return this.userService.uploadVideo(userId, videoFile);
   }
   @Post('skills')
-  addSkills(@GetUser('userId') userId: number, @Body() dto) {
+  addSkills(@GetUser('userId') userId: number, @Body() dto: string[]) {
     return this.userService.addSkills(userId, dto);
   }
 
@@ -75,13 +76,13 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   uploadProfilePicture(
     @GetUser('userId') userId: number,
-    @UploadedFile() file,
+    @UploadedFile() profilePicture: Express.Multer.File,
   ) {
-    return this.userService.uploadProfilePicture(userId, file);
+    return this.userService.uploadProfilePicture(userId, profilePicture);
   }
 
   @Post('interests')
-  addInterests(@GetUser('userId') userId: number, @Body() dto) {
+  addInterests(@GetUser('userId') userId: number, @Body() dto: string[]) {
     return this.userService.addInterests(userId, dto);
   }
 }
