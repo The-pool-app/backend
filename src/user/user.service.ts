@@ -1,35 +1,76 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
-import { PersonalPreferenceDto, UpdatePersonalDetailsDto, profilePictureUploadDto } from './dto';
+import {
+  PersonalPreferenceDto,
+  UpdatePersonalDetailsDto,
+  profilePictureUploadDto,
+} from './dto';
 import { CloudinaryService } from './media/cloudinary.service';
+import { CreateCVDto } from './dto';
 
 @Injectable()
 export class UserService {
   constructor(
     private database: DatabaseService,
     private videoServer: CloudinaryService,
-  ) { }
+  ) {}
+
+  async addProfessionalDetails(userId: number, dto: CreateCVDto) {
+    try {
+      await this.database.$transaction([
+        this.database.professional_details.update({
+          where: { userId: userId },
+          data: {
+            professionalSummary: dto.professionalSummary,
+          },
+        }),
+        this.database.work_experience.createMany({
+          data: dto.workExperience.map((experience) => ({
+            userId: userId,
+            companyName: experience.companyName,
+            position: experience.position,
+            startDate: experience.startDate,
+            endDate: experience.endDate,
+            description: experience.description,
+            jobTitle: experience.position,
+          })),
+          skipDuplicates: true,
+        }),
+        this.database.education.createMany({
+          data: dto.education.map((education) => ({
+            userId: userId,
+            degree: education.degree,
+            schoolName: education.nameOfSchool,
+            grade: education.grade,
+            graduationDate: education.DateOfGraduation,
+          })),
+          skipDuplicates: true,
+        }),
+      ]);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   async addPersonalPreferences(userId: number, dto: PersonalPreferenceDto) {
     try {
       await this.database.$transaction([
-       this.database.professional_details.update({
-        where: { userId: userId },
-        data: {
-          highestEducation: dto.highestEducation,
-          experienceLevel: dto.experienceLevel,
-          jobPreference: dto.preferredJobType,
-          status: dto.status,
-          salaryRange: JSON.stringify(dto.salaryRange),
-        },
-        
-      }),
-      this.database.personal_details.update({
-        where: { userId: userId },
-        data: {
-          location: dto.location,
-        },
-      }),
+        this.database.professional_details.update({
+          where: { userId: userId },
+          data: {
+            highestEducation: dto.highestEducation,
+            experienceLevel: dto.experienceLevel,
+            jobPreference: dto.preferredJobType,
+            status: dto.status,
+            salaryRange: JSON.stringify(dto.salaryRange),
+          },
+        }),
+        this.database.personal_details.update({
+          where: { userId: userId },
+          data: {
+            location: dto.location,
+          },
+        }),
       ]);
       return { message: 'Personal preferences added successfully' };
     } catch (error) {

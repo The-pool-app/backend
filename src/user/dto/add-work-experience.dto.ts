@@ -1,37 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
-
-export class CreateCVDto {
-  @ApiProperty()
-  professionalSummary: string;
-
-  @ApiProperty()
-  workExperience: WorkExperience[];
-
-  @ApiProperty()
-  education: Education[];
-}
-
-export class WorkExperience {
-  company: string;
-  position: string;
-  startDate: Date;
-  endDate: Date;
-  description: string;
-}
-
-export class Education {
-  institution: string;
-  degree: string;
-  startDate: Date;
-  endDate: Date;
-  description: string;
-}
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class AddWorkExperienceDto {
+  @ApiProperty()
+  @IsNotEmpty()
   companyName: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
   position: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
   startDate: Date;
+
+  @ApiProperty()
   endDate: Date;
-  location: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  companyLocation: string;
+
+  @ApiProperty()
+  @IsOptional()
   description: string;
 }

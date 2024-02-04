@@ -24,6 +24,7 @@ import {
   FileFieldsInterceptor,
   FileInterceptor,
 } from '@nestjs/platform-express';
+import { CreateCVDto } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Users')
@@ -46,12 +47,12 @@ export class UserController {
     @UploadedFiles()
     files: {
       meansOfIdentification?: Express.Multer.File[];
-      profilePicture?: Express.Multer.File[];
     },
   ) {
     console.log(files);
     return this.userService.updatePersonalDetails(userId, dto);
   }
+
   @Post('upload-video')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
@@ -70,11 +71,6 @@ export class UserController {
     return this.userService.addSkills(userId, dto);
   }
 
-  @Post('education')
-  addEducation(@GetUser('userId') userId: number, @Body() dto) {
-    return this.userService.addEducation(userId, dto);
-  }
-
   @Post('personal-preferences')
   addPersonalPreferences(
     @GetUser('userId') userId: number,
@@ -83,9 +79,17 @@ export class UserController {
     return this.userService.addPersonalPreferences(userId, dto);
   }
 
-  @Post('work-experience')
-  addWorkExperience(@GetUser('userId') userId: number, @Body() dto) {
-    return this.userService.addWorkExperience(userId, dto);
+  @Post('professional-details')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Add professional details',
+    type: CreateCVDto,
+  })
+  addProfessionalDetails(
+    @GetUser('userId') userId: number,
+    @Body() dto: CreateCVDto,
+  ) {
+    return this.userService.addProfessionalDetails(userId, dto);
   }
 
   @Post('profile-picture')
