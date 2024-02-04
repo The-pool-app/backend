@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsMimeType, IsNotEmpty, IsString } from 'class-validator';
 
 import { Gender } from '@prisma/client';
 
@@ -27,17 +27,20 @@ export class UpdatePersonalDetailsDto {
   @IsNotEmpty()
   dateOfBirth?: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsMimeType()
   @IsNotEmpty()
   meansOfIdentification?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  profilePicture?: string;
+  // @ApiProperty({ type: 'string', format: 'binary' })
+  // @IsMimeType()
+  // @IsOptional()
+  // profilePicture?: string;
 
-  @ApiProperty()
-  @IsOptional()
-  profileVideo?: string;
+  // @ApiProperty({ type: 'string', format: 'binary' })
+  // @IsMimeType()
+  // @IsOptional()
+  // profileVideo?: string;
 
   @ApiProperty()
   @IsNotEmpty()

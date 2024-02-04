@@ -10,7 +10,9 @@ async function bootstrap() {
   //app.useLogger(['error', 'warn', 'log']]);
   const config = new DocumentBuilder()
     .setTitle('The Pool API')
-    .setDescription('The Pool API description')
+    .setDescription('The Pool API documentation')
+    .setTermsOfService('https://jointhepool.com/Terms-of-use-The-pool.pdf')
+    .addBearerAuth()
     .setVersion('1.0')
     .build();
 

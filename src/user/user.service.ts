@@ -1,12 +1,16 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import { UpdatePersonalDetailsDto, profilePictureUploadDto } from './dto';
+import { CloudinaryService } from './media/cloudinary.service';
 
 @Injectable()
 export class UserService {
-  constructor(private database: DatabaseService) {}
+  constructor(
+    private database: DatabaseService,
+    private videoServer: CloudinaryService,
+  ) {}
 
-  async addInterests(userId: number, dto: any) {
+  async addInterests(userId: number, dto: string[]) {
     try {
       await this.database.professional_details.update({
         where: { userId: userId },
@@ -78,7 +82,7 @@ export class UserService {
       throw new BadRequestException(error.message);
     }
   }
-  async addSkills(userId: number, dto: any) {
+  async addSkills(userId: number, dto: string[]) {
     try {
       await this.database.professional_details.update({
         where: { userId: userId },
@@ -144,6 +148,8 @@ export class UserService {
         throw new BadRequestException('User not found');
       }
       // store the video in a blob storage
+      const videoUrl = await this.videoServer.uploadVideo(file);
+
       // return the url
       // update the user profile video field with the url
       await this.database.user.update({
@@ -151,7 +157,7 @@ export class UserService {
         data: {
           userDetail: {
             update: {
-              profileVideo: file.path,
+              profileVideo: videoUrl,
             },
           },
         },

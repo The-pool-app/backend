@@ -18,7 +18,7 @@ import {
   profilePictureUploadDto,
 } from './dto';
 import { UserService } from './user.service';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   FileFieldsInterceptor,
   FileInterceptor,
@@ -36,11 +36,9 @@ export class UserController {
   }
   @Patch('personal-details')
   @UseInterceptors(
-    FileFieldsInterceptor([
-      { name: 'meansOfIdentification', maxCount: 1 },
-      { name: 'profilePicture', maxCount: 1 },
-    ]),
+    FileFieldsInterceptor([{ name: 'meansOfIdentification', maxCount: 1 }]),
   )
+  @ApiConsumes('multipart/form-data')
   updatePersonalDetails(
     @GetUser('userId') userId: number,
     @Body() dto: UpdatePersonalDetailsDto,
