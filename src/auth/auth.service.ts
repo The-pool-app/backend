@@ -117,7 +117,7 @@ export class AuthService {
       user.email,
       'Password Reset Request',
       `<p>Hi ${user.email},</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
-        the link is <a href="com.thepool.join://auth/update-pin?token=${resetToken}"> here</a>
+        the link is <a href="https://pool-app-ss7a.onrender.com/auth/magic-link/update-pin?token=${resetToken}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
     );
     return {

@@ -6,14 +6,15 @@ import {
   HttpStatus,
   Post,
   Query,
-  Redirect,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -54,11 +55,15 @@ export class AuthController {
     return this.authService.updatePin(dto, token);
   }
 
-  @Get('magic-link/register')
-  @Redirect('com.thepool.join://auth/magic-link', HttpStatus.FOUND)
-  async registerRedirect() {}
+  @Get(`magic-link/register`)
+  async registerRedirect(@Query('token') token: string, @Res() res: Response) {
+    const deepLinkURL = `com.thepool.join://auth/magic-link?token=${token}`;
+    res.redirect(deepLinkURL);
+  }
 
   @Get('magic-link/update-pin')
-  @Redirect('com.thepool.join://auth/update-pin', HttpStatus.FOUND)
-  async updatePinRedirect() {}
+  async updatePinRedirect(@Query('token') token: string, @Res() res: Response) {
+    const deepLinkURL = `com.thepool.join://auth/update-pin?token=${token}`;
+    res.redirect(deepLinkURL);
+  }
 }

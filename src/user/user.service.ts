@@ -125,31 +125,6 @@ export class UserService {
       );
     }
   }
-  async addWorkExperience(userId: number, dto: any) {
-    try {
-      await this.database.work_experience.create({
-        data: {
-          ...dto,
-          userId: userId,
-        },
-      });
-      return { message: 'Work experience added successfully' };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-  addEducation(userId: number, dto: any) {
-    try {
-      return this.database.education.create({
-        data: {
-          ...dto,
-          userId: userId,
-        },
-      });
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
   async addSkills(userId: number, dto: string[]) {
     try {
       await this.database.professional_details.update({
