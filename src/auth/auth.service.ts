@@ -20,7 +20,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private notification: MailService,
-  ) {}
+  ) { }
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
     try {
@@ -96,34 +96,38 @@ export class AuthService {
     return { message: 'User login successfully', token };
   }
   async forgotPin(resetPasswordDto: ForgotPasswordDto) {
-    const user = await this.database.personal_details.findUnique({
-      where: { email: resetPasswordDto.email },
-    });
-    if (!user) {
-      return {
-        message: 'Link to reset password have been sent to provided email',
-      };
-    }
-    const resetToken = this.createResetToken();
+    try {
+      const user = await this.database.personal_details.findUnique({
+        where: { email: resetPasswordDto.email },
+      });
+      if (!user) {
+        return {
+          message: 'Link to reset password have been sent to provided email',
+        };
+      }
+      const resetToken = this.createResetToken();
 
-    await this.database.passwordResetToken.create({
-      data: {
-        token: resetToken,
-        userId: user.userId,
-      },
-    });
+      await this.database.passwordResetToken.create({
+        data: {
+          token: resetToken,
+          userId: user.userId,
+        },
+      });
 
-    await this.notification.sendMailWithMailJet(
-      user.email,
-      'Password Reset Request',
-      `<p>Hi ${user.email},</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
+      await this.notification.sendMailWithMailJet(
+        user.email,
+        'Password Reset Request',
+        `<p>Hi ${user.email},</p><p>You requested to update your password </br> Please click the link below to update your pin. This link is valid for 1 hour</p><p>
         the link is <a href="https://pool-app-ss7a.onrender.com/auth/magic-link/update-pin?token=${resetToken}"> here</a>
         </p><p>Regards,</p><p>The pool team</p>`,
-    );
-    return {
-      message: 'Link to reset password have been sent to provided email',
-      resetToken,
-    };
+      );
+      return {
+        message: 'Link to reset password have been sent to provided email',
+        resetToken,
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   async updatePin(updatePinDto: UpdatePinDto, token: string) {
     // get the token and hash it, then check if it exists in the database

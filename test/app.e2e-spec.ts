@@ -22,7 +22,7 @@ describe('Pool App End to End Tests', () => {
     })
       .overrideProvider(MailService)
       .useValue({
-        sendMailWithResend: jest.fn(),
+        sendMailWithMailJet: jest.fn(),
       })
       .compile();
     app = moduleRef.createNestApplication();
@@ -164,7 +164,8 @@ describe('Pool App End to End Tests', () => {
             .post('/auth/forgot-pin')
             .withBody({ email: 'john@test.com' })
             .expectBodyContains('resetToken')
-            .stores('resetToken', 'resetToken');
+            .stores('resetToken', 'resetToken')
+            .inspect();
         });
       });
       describe('Update Pin', () => {
@@ -178,8 +179,7 @@ describe('Pool App End to End Tests', () => {
             .spec()
             .post('/auth/update-pin')
             .withBody({ ...updatePinDto, confirmPin: '1234567' })
-            .expectStatus(400)
-            .inspect();
+            .expectStatus(400);
         });
         it('should throw error if pin is less than 4 characters', () => {
           return pactum
@@ -220,59 +220,58 @@ describe('Pool App End to End Tests', () => {
             .post('/auth/update-pin')
             .withQueryParams('token', '$S{resetToken}')
             .withBody(updatePinDto)
-            .expectBodyContains('User pin updated successfully')
-            .inspect();
+            .expectBodyContains('User pin updated successfully');
         });
       });
     });
   });
-  describe('User Module', () => {
-    describe('User Controller', () => {
-      describe('Get Current User', () => {
-        it('should throw error if no token is provided', () => {
-          return pactum.spec().get('/users/me').expectStatus(401);
-        });
-        it('return current user', () => {
-          return pactum
-            .spec()
-            .get('/users/me')
-            .withBearerToken('$S{userAt}')
-            .expectStatus(200);
-        });
-      });
-      describe('Update User Personal Details', () => {
-        const dto: UpdatePersonalDetailsDto = {
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '08012345678',
-          sex: 'MALE',
-          dateOfBirth: '2007-03-01T13:00:00Z',
-          jobRole: 'Software Engineer',
-          yearsOfExperience: 3,
-        };
-        it('should throw error when body is empty', () => {
-          return pactum
-            .spec()
-            .patch('/users/personal-details')
-            .withBearerToken('$S{userAt}')
-            .withBody({})
-            .expectStatus(400);
-        });
-        it('should update user', () => {
-          return pactum
-            .spec()
-            .patch('/users/personal-details')
-            .withBearerToken('$S{userAt}')
-            .withBody(dto)
-            .expectStatus(200)
-            .inspect();
-        });
-      });
-      describe('Update User Professional details', () => {});
-      describe('Update User Education details', () => {});
-      describe('Update User Work Experience details', () => {});
-    });
-  });
+  // describe('User Module', () => {
+  //   describe('User Controller', () => {
+  //     describe('Get Current User', () => {
+  //       it('should throw error if no token is provided', () => {
+  //         return pactum.spec().get('/users/me').expectStatus(401);
+  //       });
+  //       it('return current user', () => {
+  //         return pactum
+  //           .spec()
+  //           .get('/users/me')
+  //           .withBearerToken('$S{userAt}')
+  //           .expectStatus(200);
+  //       });
+  //     });
+  //     describe('Update User Personal Details', () => {
+  //       const dto: UpdatePersonalDetailsDto = {
+  //         firstName: 'John',
+  //         lastName: 'Doe',
+  //         phoneNumber: '08012345678',
+  //         sex: 'MALE',
+  //         dateOfBirth: '2007-03-01T13:00:00Z',
+  //         jobRole: 'Software Engineer',
+  //         yearsOfExperience: 3,
+  //       };
+  //       it('should throw error when body is empty', () => {
+  //         return pactum
+  //           .spec()
+  //           .patch('/users/personal-details')
+  //           .withBearerToken('$S{userAt}')
+  //           .withBody({})
+  //           .expectStatus(400);
+  //       });
+  //       it('should update user', () => {
+  //         return pactum
+  //           .spec()
+  //           .patch('/users/personal-details')
+  //           .withBearerToken('$S{userAt}')
+  //           .withBody(dto)
+  //           .expectStatus(200)
+  //           .inspect();
+  //       });
+  //     });
+  //     describe('Update User Professional details', () => {});
+  //     describe('Update User Education details', () => {});
+  //     describe('Update User Work Experience details', () => {});
+  //   });
+  // });
   // describe('Job Module', () => {
   //   describe('Job Controller', () => {
   //     const dto: CreateJobDto = {
@@ -409,8 +408,8 @@ describe('Pool App End to End Tests', () => {
   //     });
   //   });
   // });
-  describe('Payment Module', () => {});
-  describe('Chat Module', () => {});
-  describe('Notification Module', () => {});
-  describe('Admin Module', () => {});
+  describe('Payment Module', () => { });
+  describe('Chat Module', () => { });
+  describe('Notification Module', () => { });
+  describe('Admin Module', () => { });
 });

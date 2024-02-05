@@ -4,7 +4,7 @@ import { CloudinaryService } from './cloudinary.service';
 import { MulterModule } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import { ConfigModule } from '@nestjs/config';
-import { CloudinaryProvider } from 'src/user/media/cloudinary.provider';
+import { CloudinaryProvider } from './cloudinary.provider';
 
 @Module({
   imports: [
