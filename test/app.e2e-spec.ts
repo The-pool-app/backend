@@ -12,6 +12,7 @@ import {
   jobDuration,
   workType,
 } from '@prisma/client';
+import * as fs from 'fs';
 
 describe('Pool App End to End Tests', () => {
   let app: INestApplication;
@@ -164,8 +165,7 @@ describe('Pool App End to End Tests', () => {
             .post('/auth/forgot-pin')
             .withBody({ email: 'john@test.com' })
             .expectBodyContains('resetToken')
-            .stores('resetToken', 'resetToken')
-            .inspect();
+            .stores('resetToken', 'resetToken');
         });
       });
       describe('Update Pin', () => {
@@ -225,53 +225,59 @@ describe('Pool App End to End Tests', () => {
       });
     });
   });
-  // describe('User Module', () => {
-  //   describe('User Controller', () => {
-  //     describe('Get Current User', () => {
-  //       it('should throw error if no token is provided', () => {
-  //         return pactum.spec().get('/users/me').expectStatus(401);
-  //       });
-  //       it('return current user', () => {
-  //         return pactum
-  //           .spec()
-  //           .get('/users/me')
-  //           .withBearerToken('$S{userAt}')
-  //           .expectStatus(200);
-  //       });
-  //     });
-  //     describe('Update User Personal Details', () => {
-  //       const dto: UpdatePersonalDetailsDto = {
-  //         firstName: 'John',
-  //         lastName: 'Doe',
-  //         phoneNumber: '08012345678',
-  //         sex: 'MALE',
-  //         dateOfBirth: '2007-03-01T13:00:00Z',
-  //         jobRole: 'Software Engineer',
-  //         yearsOfExperience: 3,
-  //       };
-  //       it('should throw error when body is empty', () => {
-  //         return pactum
-  //           .spec()
-  //           .patch('/users/personal-details')
-  //           .withBearerToken('$S{userAt}')
-  //           .withBody({})
-  //           .expectStatus(400);
-  //       });
-  //       it('should update user', () => {
-  //         return pactum
-  //           .spec()
-  //           .patch('/users/personal-details')
-  //           .withBearerToken('$S{userAt}')
-  //           .withBody(dto)
-  //           .expectStatus(200)
-  //           .inspect();
-  //       });
-  //     });
-  //     describe('Update User Professional details', () => {});
-  //     describe('Update User Education details', () => {});
-  //     describe('Update User Work Experience details', () => {});
-  //   });
-  // });
+  describe('User Module', () => {
+    describe('User Controller', () => {
+      describe('Get Current User', () => {
+        it('should throw error if no token is provided', () => {
+          return pactum.spec().get('/users/me').expectStatus(401);
+        });
+        it('return current user', () => {
+          return pactum
+            .spec()
+            .get('/users/me')
+            .withBearerToken('$S{userAt}')
+            .expectStatus(200);
+        });
+      });
+      describe('Update User Personal Details', () => {
+        const dto: UpdatePersonalDetailsDto = {
+          firstName: 'John',
+          lastName: 'Doe',
+          phoneNumber: '08012345678',
+          sex: 'MALE',
+          dateOfBirth: '2007-03-01T13:00:00Z',
+          jobRole: 'Software Engineer',
+          yearsOfExperience: 3,
+          meansOfIdentification: fs
+            .createReadStream('test/assets/sample.jpg')
+            .toArray(),
+        };
+        it('should throw error when body is empty', () => {
+          return pactum
+            .spec()
+            .patch('/users/personal-details')
+            .withBearerToken('$S{userAt}')
+            .withBody({})
+            .expectStatus(400);
+        });
+        it('should update user', () => {
+          return pactum
+            .spec()
+            .patch('/users/personal-details')
+            .withBearerToken('$S{userAt}')
+            .withFile('meansOfIdentification', 'test/assets/sample.jpg', {
+              contentType: 'image/jpeg',
+            })
+            .withMultiPartFormData(dto)
+            .expectBodyContains('Personal details updated successfully')
+            .inspect();
+        });
+      }); b
+      describe('Update User Professional details', () => {});
+      describe('Update User Personal preferences', () => {});
+      describe('Update User Work Experience details', () => {});
+    });
+  });
   // describe('Job Module', () => {
   //   describe('Job Controller', () => {
   //     const dto: CreateJobDto = {
@@ -408,8 +414,8 @@ describe('Pool App End to End Tests', () => {
   //     });
   //   });
   // });
-  describe('Payment Module', () => { });
-  describe('Chat Module', () => { });
-  describe('Notification Module', () => { });
-  describe('Admin Module', () => { });
+  describe('Payment Module', () => {});
+  describe('Chat Module', () => {});
+  describe('Notification Module', () => {});
+  describe('Admin Module', () => {});
 });

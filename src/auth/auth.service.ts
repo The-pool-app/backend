@@ -20,7 +20,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private notification: MailService,
-  ) { }
+  ) {}
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
     try {

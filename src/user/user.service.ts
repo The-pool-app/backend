@@ -18,9 +18,16 @@ export class UserService {
   async addProfessionalDetails(userId: number, dto: CreateCVDto) {
     try {
       await this.database.$transaction([
-        this.database.professional_details.update({
-          where: { userId: userId },
-          data: {
+        this.database.professional_details.upsert({
+          create: {
+            professionalSummary: dto.professionalSummary,
+            userId: userId,
+            yearsOfExperience: 0, // Replace 0 with the actual value
+          },
+          where: {
+            userId: userId,
+          },
+          update: {
             professionalSummary: dto.professionalSummary,
           },
         }),
@@ -28,7 +35,6 @@ export class UserService {
           data: dto.workExperience.map((experience) => ({
             userId: userId,
             companyName: experience.companyName,
-            position: experience.title,
             startDate: experience.startDate,
             endDate: experience.endDate,
             description: experience.description,
@@ -47,6 +53,7 @@ export class UserService {
           skipDuplicates: true,
         }),
       ]);
+      return { message: 'Professional details added successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }

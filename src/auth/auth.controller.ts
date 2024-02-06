@@ -15,6 +15,7 @@ import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
+import { GetUser } from './decorator';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -65,5 +66,10 @@ export class AuthController {
   async updatePinRedirect(@Query('token') token: string, @Res() res: Response) {
     const deepLinkURL = `com.thepool.join://auth/update-pin?token=${token}`;
     res.redirect(deepLinkURL);
+  }
+
+  @Get('refresh')
+  async refresh(@GetUser('userId') id: number, @Req() req) {
+    return this.authService.refresh(id, req.headers['authorization']);
   }
 }
