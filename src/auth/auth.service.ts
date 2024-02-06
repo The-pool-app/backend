@@ -20,7 +20,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private notification: MailService,
-  ) {}
+  ) { }
   async register(dto: RegisterDto) {
     const hash = await argon.hash(dto.pin);
     try {
@@ -203,5 +203,16 @@ export class AuthService {
   async verifyResetToken(token: string, hash: string) {
     const hashedToken = await this.hashResetToken(token);
     return hashedToken === hash;
+  }
+  async refresh(userId, req) {
+    console.log(userId, req);
+    const user = await this.database.personal_details.findUnique({
+      where: { userId: userId },
+    });
+    if (!user) {
+      throw new ForbiddenException('Invalid user');
+    }
+    const token = await this.signToken(user.userId, user.email);
+    return { message: 'Token refreshed', token };
   }
 }
