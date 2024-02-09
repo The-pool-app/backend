@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {  IsEnum, ValidateIf } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import {
   ApplicantExperienceLevel,
   workType,
@@ -35,4 +35,3 @@ export class PersonalPreferenceDto {
   })
   status: ApplicantStatus;
 }
-

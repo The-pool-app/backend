@@ -1,7 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import {
+  InterestsDto,
   PersonalPreferenceDto,
+  SkillsDto,
   UpdatePersonalDetailsDto,
   profilePictureUploadDto,
 } from './dto';
@@ -85,13 +87,13 @@ export class UserService {
     }
   }
 
-  async addInterests(userId: number, dto: string[]) {
+  async addInterests(userId: number, dto: InterestsDto) {
     try {
       await this.database.professional_details.update({
         where: { userId: userId },
         data: {
           interests: {
-            set: dto,
+            set: dto.interests,
           },
         },
       });
@@ -132,13 +134,13 @@ export class UserService {
       );
     }
   }
-  async addSkills(userId: number, dto: string[]) {
+  async addSkills(userId: number, dto: SkillsDto) {
     try {
       await this.database.professional_details.update({
         where: { userId: userId },
         data: {
           skills: {
-            set: dto,
+            set: dto.skills,
           },
         },
       });

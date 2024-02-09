@@ -1,15 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppModule } from '../src/app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { HttpStatus, INestApplication, ValidationPipe } from '@nestjs/common';
 import { DatabaseService } from '../src/database/database.service';
 import * as pactum from 'pactum';
 import { LoginDto, RegisterDto, UpdatePinDto } from 'src/auth/dto';
-import { UpdatePersonalDetailsDto } from 'src/user/dto';
-import { CreateJobDto, EditJobDto } from 'src/job/dto';
+import {
+  CreateCVDto,
+  InterestsDto,
+  PersonalPreferenceDto,
+  SkillsDto,
+  UpdatePersonalDetailsDto,
+} from 'src/user/dto';
+// import { CreateJobDto, EditJobDto } from 'src/job/dto';
 import { MailService } from '../src/notification/mail/mail.service';
 import {
   ApplicantExperienceLevel,
-  jobDuration,
+  ApplicantStatus,
   workType,
 } from '@prisma/client';
 import * as fs from 'fs';
@@ -248,9 +254,7 @@ describe('Pool App End to End Tests', () => {
           dateOfBirth: '2007-03-01T13:00:00Z',
           jobRole: 'Software Engineer',
           yearsOfExperience: 3,
-          meansOfIdentification: fs
-            .createReadStream('test/assets/sample.jpg')
-            .toArray(),
+          meansOfIdentification: fs.createReadStream('test/assets/sample.jpg'),
         };
         it('should throw error when body is empty', () => {
           return pactum
@@ -272,10 +276,160 @@ describe('Pool App End to End Tests', () => {
             .expectBodyContains('Personal details updated successfully')
             .inspect();
         });
-      }); b
-      describe('Update User Professional details', () => {});
-      describe('Update User Personal preferences', () => {});
-      describe('Update User Work Experience details', () => {});
+      });
+      describe('Create User Personal preferences', () => {
+        const dto: PersonalPreferenceDto = {
+          salaryRange: {
+            min: 1000000,
+            value: 1500000,
+            max: 2000000,
+          },
+          experienceLevel: ApplicantExperienceLevel.MID_LEVEL,
+          highestEducation: 'BSc',
+          location: 'Lagos, Nigeria',
+          preferredJobType: workType.REMOTE,
+          status: ApplicantStatus.ACTIVELY_LOOKING,
+        };
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/personal-preferences')
+            .expectStatus(HttpStatus.UNAUTHORIZED)
+            .expectBodyContains('Unauthorized');
+        });
+        it('should create user personal preferences', () => {
+          return pactum
+            .spec()
+            .post('/users/personal-preferences')
+            .withBearerToken('$S{userAt}')
+            .withBody(dto);
+        });
+      });
+      describe('Update User Professional details', () => {
+        const dto: CreateCVDto = {
+          professionalSummary:
+            'I am a software engineer with 3 years experience',
+          education: [
+            {
+              nameOfSchool: 'University of Lagos',
+              degree: 'BSc',
+              grade: 'First Class Honours',
+              DateOfGraduation: new Date('2017-03-01T13:00:00Z'),
+            },
+          ],
+          workExperience: [
+            {
+              companyName: 'The Pool',
+              title: 'Software Engineer',
+              description: 'I am a software engineer with 3 years experience',
+              startDate: new Date('2017-03-01T13:00:00Z'),
+              endDate: new Date(),
+              location: 'Lagos, Nigeria',
+            },
+          ],
+        };
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/professional-details')
+            .expectStatus(HttpStatus.UNAUTHORIZED);
+        });
+        it('should update user professional details', () => {
+          return pactum
+            .spec()
+            .patch('/users/professional-details')
+            .withBearerToken('$S{userAt}')
+            .withBody(dto);
+        });
+      });
+      describe('Update User skills', () => {
+        const dto: SkillsDto = {
+          skills: ['Node.js', 'React.js'],
+        };
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/skills')
+            .expectStatus(HttpStatus.UNAUTHORIZED);
+        });
+        it('should update user skills', () => {
+          return pactum
+            .spec()
+            .post('/users/skills')
+            .withBearerToken('$S{userAt}')
+            .withBody(dto);
+        });
+        it('should throw error if no skills are provided', () => {
+          return pactum
+            .spec()
+            .post('/users/skills')
+            .withBearerToken('$S{userAt}')
+            .withBody((dto.skills = []))
+            .expectStatus(400)
+            .expectBodyContains('skills should not be empty');
+        });
+      });
+      describe('Update User interest ', () => {
+        const dto: InterestsDto = {
+          interests: ['Backend Development', 'Distributed Systems'],
+        };
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/interests')
+            .expectStatus(HttpStatus.UNAUTHORIZED);
+        });
+        it('should update user interests', () => {
+          return pactum
+            .spec()
+            .post('/users/interests')
+            .withBearerToken('$S{userAt}')
+            .withBody(dto);
+        });
+        it('should throw error if no interests are provided', () => {
+          return pactum
+            .spec()
+            .post('/users/interests')
+            .withBearerToken('$S{userAt}')
+            .withBody((dto.interests = []))
+            .expectStatus(400)
+            .expectBodyContains('"interests should not be empty"');
+        });
+      });
+      describe('Update User profile picture', () => {
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/profile-picture')
+            .expectStatus(HttpStatus.UNAUTHORIZED);
+        });
+        it('should update user profile picture', () => {
+          return pactum
+            .spec()
+            .post('/users/profile-picture')
+            .withBearerToken('$S{userAt}')
+            .withFile('file', 'test/assets/sample.jpg', {
+              contentType: 'image/jpeg',
+            });
+        });
+      });
+      describe('Update User video', () => {
+        it('should throw error if no token is provided', () => {
+          return pactum
+            .spec()
+            .post('/users/upload-video')
+            .expectStatus(HttpStatus.UNAUTHORIZED);
+        });
+        it('should update user video', () => {
+          return pactum
+            .spec()
+            .post('/users/upload-video')
+            .withBearerToken('$S{userAt}')
+            .withFile('file', 'test/assets/sample.mp4', {
+              contentType: 'video/mp4',
+            });
+        });
+      });
     });
   });
   // describe('Job Module', () => {
