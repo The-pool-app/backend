@@ -5,6 +5,7 @@ import {
   ApplicantExperienceLevel,
   jobDuration,
 } from '@prisma/client';
+import { SalaryDto } from 'src/user/dto/salary-range.dto';
 
 export class CreateJobDto {
   @ApiProperty()
@@ -44,5 +45,5 @@ export class CreateJobDto {
 
   @ApiProperty()
   @IsNotEmpty()
-  salaryRange: string;
+  salaryRange: SalaryDto;
 }

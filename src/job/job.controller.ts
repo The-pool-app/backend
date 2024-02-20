@@ -15,7 +15,7 @@ import {
 import { JwtAuthGuard } from '../auth/guard';
 import { JobService } from './job.service';
 import { GetUser } from '../auth/decorator';
-import { CreateJobDto } from './dto';
+import { CreateJobDto, EditJobDto } from './dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @UseGuards(JwtAuthGuard)
@@ -66,7 +66,7 @@ export class JobController {
   updateJob(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) jobId: number,
-    @Body() dto: CreateJobDto,
+    @Body() dto: EditJobDto,
   ) {
     return this.jobService.updateJobById(userId, jobId, dto);
   }

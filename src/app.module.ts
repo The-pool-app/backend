@@ -11,6 +11,9 @@ import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { AdminModule } from './admin/admin.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -34,6 +37,13 @@ import { AdminModule } from './admin/admin.module';
     PaymentModule,
     ChatModule,
     AdminModule,
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      playground: true,
+      include: [AdminModule],
+      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+      sortSchema: true,
+    }),
   ],
   controllers: [AppController],
 })

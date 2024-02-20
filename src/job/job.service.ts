@@ -66,6 +66,7 @@ export class JobService {
         jobDetails: {
           create: {
             ...dto,
+            salaryRange: String(dto.salaryRange),
           },
         },
         postedBy: {
@@ -94,6 +95,7 @@ export class JobService {
         jobDetails: {
           update: {
             ...dto,
+            salaryRange: String(dto.salaryRange),
           },
         },
       },

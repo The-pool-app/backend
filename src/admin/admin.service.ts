@@ -4,7 +4,8 @@ import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AdminService {
-  create() {
+  create(createAdminInput: any) {
+    console.log(createAdminInput);
     return 'This action adds a new admin';
   }
 
@@ -23,4 +24,17 @@ export class AdminService {
   remove(id: number) {
     return `This action removes a #${id} admin`;
   }
+  // create admin
+  // admin login
+  // admin change password
+  // admin reset password
+  // admin logout
+  // admin forgot password
+  // get all users
+  // get all users by role
+  // get all active users (user last login date is not null)
+  // get all inactive users (user last login date is null)
+  // get all user by demographic (Gender, location, age, etc)
+  // verification of user
+  // suspend/disable user account (user can't login)
 }
