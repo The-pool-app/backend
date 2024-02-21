@@ -1,13 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
   });
   //app.useLogger(['error', 'warn', 'log']]);
+
+  app.useWebSocketAdapter(new IoAdapter(app));
+  app.setGlobalPrefix('api');
   const config = new DocumentBuilder()
     .setTitle('The Pool API')
     .setDescription('The Pool API documentation')
@@ -18,6 +22,11 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+  app.enableVersioning({
+    type: VersioningType.URI,
+    prefix: 'v',
+    defaultVersion: ['1', '2'],
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
