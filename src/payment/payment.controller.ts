@@ -20,10 +20,10 @@ export class PaymentController {
   // createPlan(@Body() createPlan: CreatePlanDto) {
   //   return this.paymentService.create(createPlan);
   // }
-  @Get()
-  findAll(@GetUser('userId') userId: number) {
-    return this.paymentService.findAllPlans(userId);
-  }
+  // @Get()
+  // findAll(@GetUser('userId') userId: number) {
+  //   return this.paymentService.findAllPlans(userId);
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

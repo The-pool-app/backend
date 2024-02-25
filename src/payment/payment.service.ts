@@ -33,24 +33,24 @@ export class PaymentService {
   //   // }
   // }
 
-  async findAllPlans(userId: number): Promise<ResponseStatus> {
-    // find plans for the category of user (candidate or recruiter)
-    const user = await this.database.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    const plans = this.database.subscription_type.findMany({
-      where: {
-        category: user.roleId,
-      },
-    });
-    return {
-      success: true,
-      message: 'Plans retrieved successfully',
-      data: plans,
-    };
-  }
+  // async findAllPlans(userId: number): Promise<ResponseStatus> {
+  //   // find plans for the category of user (candidate or recruiter)
+  //   const user = await this.database.user.findUnique({
+  //     where: {
+  //       id: userId,
+  //     },
+  //   });
+  //   const plans = this.database.subscription_type.findMany({
+  //     where: {
+  //       category: user.roleId,
+  //     },
+  //   });
+  //   return {
+  //     success: true,
+  //     message: 'Plans retrieved successfully',
+  //     data: plans,
+  //   };
+  // }
 
   findOne(id: number) {
     return `This action returns a #${id} payment`;
