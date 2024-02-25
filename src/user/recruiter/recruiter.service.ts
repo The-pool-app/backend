@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
-import { ResponseStatus } from 'src/types';
+import { ResponseStatus } from 'src/utils/types';
 import {
   PersonalPreferenceDto,
   profilePictureUploadDto,

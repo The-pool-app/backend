@@ -21,16 +21,6 @@ export class CreateJobDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  companyLocation: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  company: string;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
   jobDuration: jobDuration;
 
   @ApiProperty()

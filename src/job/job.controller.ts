@@ -25,7 +25,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 export class JobController {
   constructor(private jobService: JobService) {}
   @Post()
-  createJob(@GetUser('id') userId: number, @Body() dto: CreateJobDto) {
+  createJob(@GetUser('userId') userId: number, @Body() dto: CreateJobDto) {
     return this.jobService.createJob(userId, dto);
   }
 
@@ -53,35 +53,13 @@ export class JobController {
     });
   }
 
-  @Get(':id')
-  getJobById(
-    @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) jobId: number,
-  ) {
-    return this.jobService.getJobById(userId, jobId);
-  }
-
-  @HttpCode(HttpStatus.ACCEPTED)
-  @Patch(':id')
-  updateJob(
-    @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) jobId: number,
-    @Body() dto: EditJobDto,
-  ) {
-    return this.jobService.updateJobById(userId, jobId, dto);
-  }
-
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @Delete(':id')
-  deleteJobById(
-    @GetUser('id') userId: number,
-    @Param('id', ParseIntPipe) jobId: number,
-  ) {
-    return this.jobService.deleteJobById(userId, jobId);
+  @Get('seed-job')
+  seedJobBoard() {
+    return this.jobService.seedRelatedData();
   }
   @Get('job-board')
   getJobBoard(
-    @GetUser('id') userId: number,
+    @GetUser('userId') userId: number,
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
     @Query('search') search?: string,
@@ -99,8 +77,30 @@ export class JobController {
     });
   }
 
-  @Get('seed-jobboard')
-  seedJobBoard() {
-    return this.jobService.seedRelatedData();
+  @Get(':id')
+  getJobById(
+    @GetUser('id') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+  ) {
+    return this.jobService.getJobById(userId, jobId);
+  }
+
+  @HttpCode(HttpStatus.ACCEPTED)
+  @Patch(':id')
+  updateJob(
+    @GetUser('userId') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+    @Body() dto: EditJobDto,
+  ) {
+    return this.jobService.updateJobById(userId, jobId, dto);
+  }
+
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete(':id')
+  deleteJobById(
+    @GetUser('userId') userId: number,
+    @Param('id', ParseIntPipe) jobId: number,
+  ) {
+    return this.jobService.deleteJobById(userId, jobId);
   }
 }

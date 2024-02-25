@@ -9,7 +9,7 @@ import {
 } from '../dto';
 import { DatabaseService } from 'src/database/database.service';
 import { CloudinaryService } from '../media/cloudinary.service';
-import { ResponseStatus } from 'src/types';
+import { ResponseStatus } from 'src/utils/types';
 
 @Injectable()
 export class CandidateService {

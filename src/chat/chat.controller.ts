@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { GetUser } from 'src/auth/decorator';
 import { CreateChatDto } from './dto';
 import { ChatService } from './chat.service';
-import { ResponseStatus } from 'src/types';
+import { ResponseStatus } from 'src/utils/types';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard';
 

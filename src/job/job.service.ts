@@ -15,83 +15,92 @@ export class JobService {
 
   async seedRelatedData() {
     try {
-      await this.seedJobBoard();
+      await this.seedJob();
       await this.seedUsers();
       return { message: 'Data seeded successfully' };
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
+
+  async seedJob(jobCount: number = 10) {
+    try {
+      const users = await this.database.user.findMany();
+      console.log(users);
+      for (const user of users) {
+        for (let i = 0; i < jobCount; i++) {
+          await this.database.job.create({
+            data: {
+              jobDetails: {
+                create: {
+                  title: faker.helpers.arrayElement([
+                    'Software Engineer',
+                    'Product Manager',
+                    'Data Scientist',
+                    'Data Analyst',
+                    'Business Analyst',
+                    'Project Manager',
+                    'DevOps Engineer',
+                    'QA Engineer',
+                    'UX Designer',
+                    'UI Designer',
+                  ]),
+                  jobDescription: faker.lorem.paragraph(),
+                  jobDuration: faker.helpers
+                    .arrayElement([
+                      'full_time',
+                      'part_time',
+                      'contract',
+                      'internship',
+                    ])
+                    .toUpperCase() as any,
+                  workType: faker.helpers
+                    .arrayElement(['remote', 'onsite', 'hybrid'])
+                    .toUpperCase() as any,
+                  experience: faker.helpers
+                    .arrayElement(['junior', 'senior', 'mid_level'])
+                    .toUpperCase() as any,
+                  salaryRange: JSON.stringify({
+                    min: String(Math.floor(Math.random() * 100000) + 100000),
+                    max: String(Math.floor(Math.random() * 200000) + 200000),
+                  }),
+                },
+              },
+              postedBy: {
+                connect: {
+                  id: user.id,
+                },
+              },
+            },
+          });
+        }
+      }
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-  async seedJobBoard(jobCount: number = 10) {
-    const users = await this.database.user.findMany();
-    console.log(users);
-    const jobs = [];
-    for (const user of users) {
-      for (let i = 0; i < jobCount; i++) {
-        jobs.push({
-          jobDetails: {
-            create: {
-              title: faker.helpers.arrayElement([
-                'Software Engineer',
-                'Product Manager',
-                'Data Scientist',
-                'Data Analyst',
-                'Business Analyst',
-                'Project Manager',
-                'DevOps Engineer',
-                'QA Engineer',
-                'UX Designer',
-                'UI Designer',
-              ]),
-              description: faker.lorem.paragraph(),
-              jobDuration: faker.helpers
-                .arrayElement([
-                  'full_time',
-                  'part_time',
-                  'contract',
-                  'internship',
-                ])
-                .toUpperCase() as any,
-              workType: faker.helpers
-                .arrayElement(['remote', 'onsite', 'hybrid'])
-                .toUpperCase() as any,
-              experience: faker.helpers
-                .arrayElement(['junior', 'mid_level', 'senior'])
-                .toUpperCase() as any,
-              salaryRange: faker.helpers.objectKey({
-                min: Math.floor(Math.random() * 100000) + 100000,
-                max: Math.floor(Math.random() * 200000) + 200000,
-              }),
-            },
-          },
-          postedBy: {
-            connect: {
-              id: user.id,
-            },
-          },
-        });
-      }
-    }
-    await this.database.job.createMany({
-      data: jobs,
-    });
-  }
 
   async seedUsers(num: number = 10) {
-    const users = [];
-    for (let i = 0; i < num; i++) {
-      users.push({
-        email: faker.internet.email(),
-        pin: faker.internet.password({ length: 6 }),
-        role: faker.helpers
-          .arrayElement(['recruiter', 'candidate'])
-          .toUpperCase() as any,
-      });
+    try {
+      for (let i = 0; i < num; i++) {
+        await this.database.personal_details.create({
+          data: {
+            email: faker.internet.email(),
+            pin: faker.internet.password({ length: 10 }),
+            firstName: faker.name.firstName(),
+            lastName: faker.name.lastName(),
+            user: {
+              create: {
+                roleId: faker.helpers.arrayElement(['CANDIDATE', 'RECRUITER']),
+              },
+            },
+          },
+        }); // create a user
+      }
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
-    console.log(users);
-    await this.database.user.createMany({
-      data: users,
-    });
   }
   getJobBoard({ limit, offset, search, experience, workType, jobDuration }) {
     // get all jobs that are not expired
@@ -116,6 +125,10 @@ export class JobService {
               equals: jobDuration,
             },
           },
+        },
+        include: {
+          postedBy: true,
+          jobDetails: true,
         },
         take: parseInt(limit as any),
         skip: offset,
@@ -148,7 +161,7 @@ export class JobService {
         jobDetails: {
           create: {
             ...dto,
-            salaryRange: String(dto.salaryRange),
+            salaryRange: JSON.stringify(dto.salaryRange),
           },
         },
         postedBy: {

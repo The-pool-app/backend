@@ -7,7 +7,11 @@ import { GoogleStrategy } from './strategy';
 // import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [JwtModule.register({})],
+  imports: [
+    JwtModule.register({
+      signOptions: { expiresIn: 60 * 60 * 24 },
+    }),
+  ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, GoogleStrategy],
 })

@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
-import { IPlanCategory } from 'src/types';
+import { IPlanCategory } from 'src/utils/types';
 
 export class CreatePlanDto {
   @IsNotEmpty()

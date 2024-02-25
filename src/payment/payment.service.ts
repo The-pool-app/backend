@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as https from 'https';
 import { DatabaseService } from 'src/database/database.service';
 // import { CreatePlanDto } from './dto';
-import { ResponseStatus } from 'src/types';
+import { ResponseStatus } from 'src/utils/types';
 // import { UserRole } from '@prisma/client';
 
 @Injectable()
