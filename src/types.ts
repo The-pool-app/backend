@@ -3,3 +3,8 @@ export interface ResponseStatus {
   message: string;
   data?: object;
 }
+
+export enum IPlanCategory {
+  CANDIDATE = 'CANDIDATE',
+  RECRUITER = 'RECRUITER',
+}

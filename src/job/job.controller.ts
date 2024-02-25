@@ -98,4 +98,9 @@ export class JobController {
       jobDuration,
     });
   }
+
+  @Get('seed-jobboard')
+  seedJobBoard() {
+    return this.jobService.seedJobBoard();
+  }
 }

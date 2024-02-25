@@ -50,8 +50,10 @@ model subscription_type {
   name         String
   description  String
   price        Float
+  planID       String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  category     String      
   subscription subscription[]
 }
 

@@ -1,24 +1,28 @@
-import { Controller, Get, Post, Body, Param, UseGuards } from '@nestjs/common';
-import { CreatePaymentDto } from './dto/create-payment.dto';
+import { Controller, Get, Post, Param, UseGuards, Body } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard';
-// import { Paystack } from 'paystack-sdk';
-// import { InjectPaystackClient } from 'paystack-nestjs';
+import { PaymentService } from './payment.service';
+import { GetUser } from 'src/auth/decorator';
+import { CreatePlanDto } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
 @Controller('payment')
 export class PaymentController {
-  constructor() {}
+  constructor(private paymentService: PaymentService) {}
 
   @Post()
-  create(@Body() createPaymentDto: CreatePaymentDto) {
-    return { message: 'Payment successful' + createPaymentDto };
+  pay(@GetUser('userId') userId: number, @Body() planId: string) {
+    return this.paymentService.pay(userId, planId);
   }
 
+  @Post('create-plan')
+  createPlan(@Body() createPlan: CreatePlanDto) {
+    return this.paymentService.create(createPlan);
+  }
   @Get()
-  findAll() {
-    return `This action returns all payment`;
+  findAll(@GetUser('userId') userId: number) {
+    return this.paymentService.findAllPlans(userId);
   }
 
   @Get(':id')
