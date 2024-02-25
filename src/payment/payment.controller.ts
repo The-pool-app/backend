@@ -16,10 +16,10 @@ export class PaymentController {
     return this.paymentService.pay(userId, planId);
   }
 
-  @Post('create-plan')
-  createPlan(@Body() createPlan: CreatePlanDto) {
-    return this.paymentService.create(createPlan);
-  }
+  // @Post('create-plan')
+  // createPlan(@Body() createPlan: CreatePlanDto) {
+  //   return this.paymentService.create(createPlan);
+  // }
   @Get()
   findAll(@GetUser('userId') userId: number) {
     return this.paymentService.findAllPlans(userId);
