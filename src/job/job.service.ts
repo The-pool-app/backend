@@ -14,12 +14,17 @@ export class JobService {
   constructor(private database: DatabaseService) {}
 
   async seedRelatedData() {
-    await this.seedJobBoard();
-    await this.seedUsers();
-    return { message: 'Data seeded successfully' };
+    try {
+      await this.seedJobBoard();
+      await this.seedUsers();
+      return { message: 'Data seeded successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
   async seedJobBoard(jobCount: number = 10) {
     const users = await this.database.user.findMany();
+    console.log(users);
     const jobs = [];
     for (const user of users) {
       for (let i = 0; i < jobCount; i++) {
@@ -78,8 +83,12 @@ export class JobService {
       users.push({
         email: faker.internet.email(),
         pin: faker.internet.password({ length: 6 }),
+        role: faker.helpers
+          .arrayElement(['recruiter', 'candidate'])
+          .toUpperCase() as any,
       });
     }
+    console.log(users);
     await this.database.user.createMany({
       data: users,
     });

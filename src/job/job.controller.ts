@@ -101,6 +101,6 @@ export class JobController {
 
   @Get('seed-jobboard')
   seedJobBoard() {
-    return this.jobService.seedJobBoard();
+    return this.jobService.seedRelatedData();
   }
 }

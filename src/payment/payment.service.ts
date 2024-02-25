@@ -12,26 +12,26 @@ export class PaymentService {
     private config: ConfigService,
     private database: DatabaseService,
   ) {}
-  async create(dto: CreatePlanDto): Promise<ResponseStatus> {
-    // try {
-    const newPlan = await this.database.subscription_type.create({
-      data: {
-        name: dto.planName,
-        description: dto.description,
-        price: Number(dto.price),
-        category: dto.category as UserRole,
-        planID: dto.planId,
-      },
-    });
-    return {
-      success: true,
-      message: 'Plan created successfully',
-      data: newPlan,
-    };
-    // } catch (error) {
-    //   throw new BadRequestException(error.message);
-    // }
-  }
+  // async create(dto: CreatePlanDto): Promise<ResponseStatus> {
+  //   // try {
+  //   const newPlan = await this.database.subscription_type.create({
+  //     data: {
+  //       name: dto.planName,
+  //       description: dto.description,
+  //       price: Number(dto.price),
+  //       category: dto.category as UserRole,
+  //       planID: dto.planId,
+  //     },
+  //   });
+  //   return {
+  //     success: true,
+  //     message: 'Plan created successfully',
+  //     data: newPlan,
+  //   };
+  //   // } catch (error) {
+  //   //   throw new BadRequestException(error.message);
+  //   // }
+  // }
 
   async findAllPlans(userId: number): Promise<ResponseStatus> {
     // find plans for the category of user (candidate or recruiter)
