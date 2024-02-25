@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard';
 import { PaymentService } from './payment.service';
 import { GetUser } from 'src/auth/decorator';
-import { CreatePlanDto } from './dto';
+// import { CreatePlanDto } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
