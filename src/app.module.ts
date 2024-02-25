@@ -11,10 +11,9 @@ import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { AdminModule } from './admin/admin.module';
-import { GraphQLModule } from '@nestjs/graphql';
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import { join } from 'path';
 import { EventsModule } from './events/events.module';
+import { TerminusModule } from '@nestjs/terminus';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -38,14 +37,9 @@ import { EventsModule } from './events/events.module';
     PaymentModule,
     ChatModule,
     AdminModule,
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      playground: true,
-      include: [AdminModule],
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      sortSchema: true,
-    }),
     EventsModule,
+    TerminusModule, // Health check
+    HttpModule,
   ],
   controllers: [AppController],
 })

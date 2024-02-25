@@ -4,4 +4,6 @@ export class CreateChatDto {
   @IsString()
   @IsNotEmpty()
   message: string;
+
+  receiverId: number;
 }

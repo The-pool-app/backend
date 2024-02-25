@@ -1,13 +1,12 @@
-import { ObjectType, Field, Int } from '@nestjs/graphql';
+import { ApiProperty } from '@nestjs/swagger';
 
-@ObjectType()
 export class Admin {
-  @Field(() => Int, { description: 'Admin id' })
+  @ApiProperty()
   id: number;
 
-  @Field(() => String, { description: 'Admin email address' })
+  @ApiProperty()
   email: string;
 
-  @Field(() => String, { description: 'Admin password' })
+  @ApiProperty()
   password: string;
 }

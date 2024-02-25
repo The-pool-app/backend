@@ -1,23 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { CreateChatDto } from './dto/create-chat.dto';
-import { UpdateChatDto } from './dto/update-chat.dto';
+import { DatabaseService } from 'src/database/database.service';
+import { EventsGateway } from 'src/events/events.gateway';
 
 @Injectable()
 export class ChatService {
-  create(createChatDto: CreateChatDto) {
-    return 'This action adds a new chat';
+  constructor(
+    private databaseService: DatabaseService,
+    private eventsGateWay: EventsGateway,
+  ) {}
+  async create(userId: number, createChatDto: CreateChatDto) {
+    const newMessage = await this.databaseService.messages.create({
+      data: {
+        content: createChatDto.message,
+        senderId: userId,
+        receiverId: createChatDto.receiverId,
+      },
+    });
+    // emit event createMessage
+    return newMessage;
   }
 
-  findAll() {
-    return `This action returns all chat`;
+  async findAll(senderId: number, receiverId: number) {
+    const getMessages = await this.databaseService.messages.findMany({
+      where: {
+        OR: [
+          {
+            senderId: senderId,
+            receiverId: receiverId,
+          },
+          {
+            senderId: receiverId,
+            receiverId: senderId,
+          },
+        ],
+      },
+    });
+    this.eventsGateWay.receiveAllMessages(getMessages);
+    return `This action returns all messages in a chat between ${senderId} and ${receiverId}`;
   }
 
   findOne(id: number) {
     return `This action returns a #${id} chat`;
-  }
-
-  update(id: number, updateChatDto: UpdateChatDto) {
-    return `This action updates a #${id} chat`;
   }
 
   remove(id: number) {

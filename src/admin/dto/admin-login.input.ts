@@ -1,10 +1,9 @@
-import { InputType, Field } from '@nestjs/graphql';
+import { IsNotEmpty } from 'class-validator';
 
-@InputType()
-export class AdminLoginInput {
-  @Field(() => String, { description: 'Email Address' })
+export class AdminLoginDto {
+  @IsNotEmpty()
   email: string;
 
-  @Field(() => String, { description: 'Password' })
+  @IsNotEmpty()
   password: string;
 }

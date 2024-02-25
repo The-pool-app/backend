@@ -1,18 +1,26 @@
 import { Controller, Get, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import {
+  HealthCheck,
+  HealthCheckService,
+  HttpHealthIndicator,
+} from '@nestjs/terminus';
 
 @ApiTags('Health')
 @Controller('health')
 export class AppController {
-  constructor() {}
+  constructor(
+    private health: HealthCheckService,
+    private http: HttpHealthIndicator,
+  ) {}
 
   @Get()
+  @HealthCheck()
   @HttpCode(HttpStatus.OK)
-  async getHealth() {
-    return {
-      message: 'All systems are operational',
-      timestamp: new Date().toISOString(),
-      status: 200,
-    };
+  async check() {
+    return this.health.check([
+      () => this.http.pingCheck('google', 'https://google.com'),
+      () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com'),
+    ]);
   }
 }
