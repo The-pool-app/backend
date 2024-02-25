@@ -85,10 +85,14 @@ model job_details {
 }
 
 model company {
-  name        String @id
-  description String
-  location    String
-  jobs        Int[]
+  name               String @id
+  createdBy          Int
+  User               User   @relation(fields: [createdBy], references: [id])
+  location           String
+  website            String
+  registrationNumber String
+  businessSector     String
+  jobs               Int[]
 }
 
 model User {
@@ -103,6 +107,7 @@ model User {
   subscription               subscription[]
   professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
   professional_detailsUserId Int?
+  company                    company[]
 }
 
 model Job {

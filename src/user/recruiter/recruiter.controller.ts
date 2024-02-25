@@ -18,20 +18,17 @@ import { User } from '@prisma/client';
 import { GetUser } from 'src/auth/decorator';
 import {
   UpdatePersonalDetailsDto,
-  VideoFileUploadDto,
-  SkillsDto,
   PersonalPreferenceDto,
-  CreateCVDto,
   profilePictureUploadDto,
-  InterestsDto,
 } from '../dto';
 import { JwtAuthGuard } from 'src/auth/guard';
 import { RecruiterService } from './recruiter.service';
+import { BusinessDetailsDto } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Recruiter')
 @ApiBearerAuth()
-@Controller('recruiter')
+@Controller()
 export class RecruiterController {
   constructor(private recruiterService: RecruiterService) {}
   @Get('me')
@@ -55,24 +52,6 @@ export class RecruiterController {
     return this.recruiterService.updatePersonalDetails(userId, dto);
   }
 
-  @Post('upload-video')
-  @UseInterceptors(FileInterceptor('file'))
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Upload a video file',
-    type: VideoFileUploadDto,
-  })
-  uploadVideo(
-    @GetUser('userId') userId: number,
-    @UploadedFile() videoFile: Express.Multer.File,
-  ) {
-    return this.recruiterService.uploadVideo(userId, videoFile);
-  }
-  @Post('skills')
-  addSkills(@GetUser('userId') userId: number, @Body() dto: SkillsDto) {
-    return this.recruiterService.addSkills(userId, dto);
-  }
-
   @Post('personal-preferences')
   addPersonalPreferences(
     @GetUser('userId') userId: number,
@@ -81,16 +60,16 @@ export class RecruiterController {
     return this.recruiterService.addPersonalPreferences(userId, dto);
   }
 
-  @Post('professional-details')
+  @Post('business-details')
   @ApiBody({
-    description: 'Add professional details to user profile',
-    type: CreateCVDto,
+    description: 'Add business details to recruiter profile',
+    type: BusinessDetailsDto,
   })
-  addProfessionalDetails(
+  addBusinessDetails(
     @GetUser('userId') userId: number,
-    @Body() dto: CreateCVDto,
+    @Body() dto: BusinessDetailsDto,
   ) {
-    return this.recruiterService.addProfessionalDetails(userId, dto);
+    return this.recruiterService.addBusinessDetails(userId, dto);
   }
 
   @Post('profile-picture')
@@ -107,9 +86,10 @@ export class RecruiterController {
     return this.recruiterService.uploadProfilePicture(userId, profilePicture);
   }
 
-  @Post('interests')
-  addInterests(@GetUser('userId') userId: number, @Body() dto: InterestsDto) {
-    return this.recruiterService.addInterests(userId, dto);
+  @Get('all-candidates')
+  getAllCandidates() {
+    // TODO
+    return this.recruiterService.getAllCandidates();
   }
   // TODO
   // Add candidate to favorite

@@ -1,13 +1,6 @@
 import { AdminService } from './admin.service';
 import { DatabaseService } from 'src/database/database.service';
-import {
-  Controller,
-  Delete,
-  Get,
-  Patch,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard';
 
@@ -38,24 +31,35 @@ export class AdminController {
 
   @Get('all-users')
   findAllUsers() {
-    try {
-      return this.database.user.findMany();
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    return this.adminService.findAllUsers();
   }
   @Get('users/:id')
   findOne() {
-    return this.adminService.findOne(0);
+    return this.adminService.findOneUser(0);
   }
 
-  @Patch('update')
-  updateAdmin() {
-    return this.adminService.update(0);
+  @Get('jobs')
+  findAllJobs() {
+    return this.adminService.findAllJobs();
+  }
+
+  @Get('jobs/:id')
+  findJobById() {
+    return this.adminService.findJobById(0);
   }
 
   @Delete('remove/:id')
   removeAdmin() {
     return this.adminService.remove(0);
+  }
+
+  // subscriptions
+  @Get('subscriptions')
+  findAllSubscriptions() {
+    return this.adminService.findAllSubscriptions();
+  }
+  @Get('subscriptions/:id')
+  findASubscription() {
+    return this.adminService.findASubscription(0);
   }
 }

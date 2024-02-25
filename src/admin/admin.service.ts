@@ -1,24 +1,65 @@
-import { Injectable } from '@nestjs/common';
-// import { CreateAdminInput } from './dto/create-admin.input';
-// import { UpdateAdminInput } from './dto/update-admin.input';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class AdminService {
+  constructor(private database: DatabaseService) {}
+  findAllSubscriptions() {
+    // fetch all subscriptions from paystack
+    // url="https://api.paystack.co/subscription"
+    // authorization="Authorization: Bearer YOUR_SECRET_KEY"
+  }
+
+  findASubscription(id: number) {
+    // fetch a subscription from paystack
+    // url="https://api.paystack.co/subscription/:id"
+    // authorization="Authorization: Bearer
+    return `This action returns a #${id} subscription`;
+  }
+  findAllUsers() {
+    try {
+      return this.database.user.findMany();
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  findOneUser(id: number) {
+    try {
+      return this.database.user.findUnique({
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+  findAllJobs() {
+    return this.database.job.findMany();
+  }
   create(createAdminInput: any) {
     console.log(createAdminInput);
     return 'This action adds a new admin';
   }
 
-  findAll() {
-    return `This action returns all admin`;
+  findJobById(id: number) {
+    try {
+      return this.database.job.findUnique({
+        where: {
+          id: id,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} admin`;
+  verifyUser(id: number) {
+    return `This action verifies a #${id} user`;
   }
 
-  update(id: number) {
-    return `This action updates a #${id} admin`;
+  suspendUser(id: number) {
+    return `This action bans a #${id} user`;
   }
 
   remove(id: number) {

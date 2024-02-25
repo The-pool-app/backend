@@ -2,14 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { ResponseStatus } from 'src/types';
 import {
-  CreateCVDto,
   PersonalPreferenceDto,
-  InterestsDto,
   profilePictureUploadDto,
   SkillsDto,
   UpdatePersonalDetailsDto,
 } from '../dto';
 import { CloudinaryService } from '../media/cloudinary.service';
+import { BusinessDetailsDto } from './dto';
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class RecruiterService {
@@ -17,50 +17,53 @@ export class RecruiterService {
     private database: DatabaseService,
     private videoServer: CloudinaryService,
   ) {}
-  async addProfessionalDetails(
+  async addBusinessDetails(
     userId: number,
-    dto: CreateCVDto,
+    dto: BusinessDetailsDto,
   ): Promise<ResponseStatus> {
     try {
-      await this.database.$transaction([
-        this.database.professional_details.upsert({
-          create: {
-            professionalSummary: dto.professionalSummary,
-            userId: userId,
-            yearsOfExperience: 0, // Replace 0 with the actual value
+      await this.database.company.create({
+        data: {
+          name: dto.companyName,
+          location: dto.OfficeAddress,
+          businessSector: dto.businessSector,
+          registrationNumber: dto.companyRegistrationNumber,
+          website: dto.companyWebsite,
+          User: {
+            connect: {
+              id: userId,
+            },
           },
-          where: {
-            userId: userId,
-          },
-          update: {
-            professionalSummary: dto.professionalSummary,
-          },
-        }),
-        this.database.work_experience.createMany({
-          data: dto.workExperience.map((experience) => ({
-            userId: userId,
-            companyName: experience.companyName,
-            startDate: experience.startDate,
-            endDate: experience.endDate,
-            description: experience.description,
-            jobTitle: experience.title,
-          })),
-          skipDuplicates: true,
-        }),
-        this.database.education.createMany({
-          data: dto.education.map((education) => ({
-            userId: userId,
-            degree: education.degree,
-            schoolName: education.nameOfSchool,
-            grade: education.grade,
-            graduationDate: education.DateOfGraduation,
-          })),
-          skipDuplicates: true,
-        }),
-      ]);
+        },
+      });
       return {
         success: true,
-        message: 'Professional details added successfully',
+        message: 'Business details added successfully',
+      };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async getAllCandidates(): Promise<ResponseStatus> {
+    try {
+      const candidates = await this.database.professional_details.findMany({
+        include: {
+          User: {
+            where: {
+              roleId: UserRole.CANDIDATE,
+            },
+            include: {
+              userDetail: true,
+              work_experience: true,
+            },
+          },
+        },
+      });
+      return {
+        success: true,
+        message: 'All Candidates retrieved successfully',
+        data: candidates,
       };
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -99,27 +102,6 @@ export class RecruiterService {
     }
   }
 
-  async addInterests(
-    userId: number,
-    dto: InterestsDto,
-  ): Promise<ResponseStatus> {
-    try {
-      await this.database.professional_details.update({
-        where: { userId: userId },
-        data: {
-          interests: {
-            set: dto.interests,
-          },
-        },
-      });
-      return {
-        success: true,
-        message: 'Interests added successfully',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
   async uploadProfilePicture(
     userId: number,
     profileDto: profilePictureUploadDto,
@@ -211,42 +193,5 @@ export class RecruiterService {
       this.database.user.delete({ where: { id: userId } }),
     ]);
     return { success: true, message: 'Profile deleted successfully' };
-  }
-
-  async uploadVideo(
-    userId: number,
-    file: Express.Multer.File,
-  ): Promise<ResponseStatus> {
-    try {
-      if (file.mimetype !== 'video/mp4') {
-        throw new BadRequestException(
-          'Invalid file type. Only videos are allowed',
-        );
-      }
-      const user = await this.database.user.findUnique({
-        where: { id: userId },
-      });
-      if (!user) {
-        throw new BadRequestException('User not found');
-      }
-      // store the video in a blob storage
-      const videoUrl = await this.videoServer.uploadVideo(file);
-
-      // return the url
-      // update the user profile video field with the url
-      await this.database.user.update({
-        where: { id: userId },
-        data: {
-          userDetail: {
-            update: {
-              profileVideo: videoUrl,
-            },
-          },
-        },
-      });
-      return { success: true, message: 'Video uploaded successfully' };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
   }
 }

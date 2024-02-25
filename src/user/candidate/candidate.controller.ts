@@ -31,7 +31,7 @@ import { JwtAuthGuard } from 'src/auth/guard';
 @UseGuards(JwtAuthGuard)
 @ApiTags('Candidate')
 @ApiBearerAuth()
-@Controller('candidate')
+@Controller()
 export class CandidateController {
   constructor(private candidateService: CandidateService) {}
   @Get('me')
