@@ -13,7 +13,9 @@ export class PersonalPreferenceDto {
 
   @ApiProperty()
   @IsEnum(['JUNIOR', 'MID_LEVEL', 'SENIOR'], {
-    message: 'experience level can only be JUNIOR, SENIOR or a MID_LEVEL',
+    message:
+      'experience level can only be one of these' +
+      Object.values(ApplicantExperienceLevel).join(', '),
   })
   experienceLevel: ApplicantExperienceLevel;
 
@@ -25,13 +27,16 @@ export class PersonalPreferenceDto {
 
   @ApiProperty()
   @IsEnum(['REMOTE', 'ONSITE', 'HYBRID'], {
-    message: 'work type can only be REMOTE, ONSITE or HYBRID',
+    message:
+      'work type can only be one of these' + Object.values(workType).join(', '),
   })
   preferredJobType: workType;
 
   @ApiProperty()
   @IsEnum(['ACTIVELY_LOOKING', 'NOT_LOOKING', 'OPEN_TO_OFFERS'], {
-    message: 'status can only be ACTIVE, NOT_LOOKING or OPEN_TO_OFFERS',
+    message:
+      'status can only be one of these' +
+      Object.values(ApplicantStatus).join(', '),
   })
   status: ApplicantStatus;
 }
