@@ -59,7 +59,7 @@ export class JobController {
   }
   @Get('job-board')
   getJobBoard(
-    @Body() currentPage: number, 
+    @Body() currentPage: number,
     @Query('search') search?: string,
     @Query('experience') experience?: string,
     @Query('workType') workType?: string,

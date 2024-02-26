@@ -1,5 +1,5 @@
 export interface PaginatedResult<T> {
-  data: T[];
+  items: T[];
   meta: {
     total: number;
     lastPage: number;
@@ -39,7 +39,7 @@ export const paginator = (
     const lastPage = Math.ceil(total / perPage);
 
     return {
-      data,
+      items: data,
       meta: {
         total,
         lastPage,

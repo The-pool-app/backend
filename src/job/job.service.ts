@@ -9,14 +9,8 @@ import { CreateJobDto, EditJobDto } from './dto';
 import { JobSearchOptions } from './dto';
 import { faker } from '@faker-js/faker';
 import { ResponseStatus } from 'src/utils/types';
-import {
-  PaginateFunction,
-  PaginatedResult,
-  paginator,
-} from 'src/utils/paginator';
-import { Job } from '@prisma/client';
+import { PaginateFunction, paginator } from 'src/utils/paginator';
 
-const paginate: PaginateFunction = paginator({ perPage: 10 });
 @Injectable()
 export class JobService {
   constructor(private database: DatabaseService) {}
@@ -116,14 +110,19 @@ export class JobService {
     experience,
     workType,
     jobDuration,
-  }): Promise<PaginatedResult<Job>> {
+  }): Promise<ResponseStatus> {
     // get all jobs that are not expired
     // get all jobs that are not filled
     // get all jobs that are not deleted
     // get all jobs that are not draft
     // get all jobs that are not private
     try {
-      return paginate(this.database.job, {
+      const page = Number(currentPage['currentPage']);
+      const paginate: PaginateFunction = paginator({
+        perPage: 10,
+        page,
+      });
+      const jobs = await paginate(this.database.job, {
         include: {
           jobDetails: true,
         },
@@ -137,8 +136,13 @@ export class JobService {
             jobDuration: jobDuration as any,
           },
         },
-        skip: (currentPage - 1) * 10,
+        skip: (page - 1) * 10,
       });
+      return {
+        success: true,
+        message: 'Jobs retrieved successfully',
+        data: jobs,
+      };
     } catch (error) {
       throw new BadRequestException(error.message);
     }

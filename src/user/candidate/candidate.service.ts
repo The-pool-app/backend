@@ -175,21 +175,29 @@ export class CandidateService {
     dto: UpdatePersonalDetailsDto,
   ): Promise<ResponseStatus> {
     try {
-      await this.database.user.update({
+      await this.database.user.upsert({
         where: { id: userId },
-        data: {
+        create: {
+          professional_details: {
+            create: {
+              userId: userId,
+              jobRole: dto.jobRole,
+              yearsOfExperience: Number(dto.yearsOfExperience),
+            },
+          },
+        },
+        update: {
           userDetail: {
             update: {
               dateOfBirth: dto.dateOfBirth,
               firstName: dto.firstName,
               lastName: dto.lastName,
               phoneNumber: dto.phoneNumber,
-              sex: dto.sex,
               meansOfIdentification: dto.meansOfIdentification,
-            },
+            }
           },
           professional_details: {
-            create: {
+            update: {
               userId: userId,
               jobRole: dto.jobRole,
               yearsOfExperience: Number(dto.yearsOfExperience),
