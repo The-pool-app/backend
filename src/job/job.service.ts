@@ -90,8 +90,8 @@ export class JobService {
           data: {
             email: faker.internet.email(),
             pin: faker.internet.password({ length: 10 }),
-            firstName: faker.name.firstName(),
-            lastName: faker.name.lastName(),
+            firstName: faker.person.firstName(),
+            lastName: faker.person.lastName(),
             user: {
               create: {
                 roleId: faker.helpers.arrayElement(['CANDIDATE', 'RECRUITER']),

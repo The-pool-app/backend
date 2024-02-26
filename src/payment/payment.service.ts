@@ -88,7 +88,6 @@ export class PaymentService {
     return `This action returns a #${id} payment`;
   }
   async pay(userId: number, planId: string) {
-    console.log(userId, planId);
     const user = await this.database.personal_details.findFirst({
       where: {
         userId: userId,

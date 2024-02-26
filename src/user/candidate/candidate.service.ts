@@ -23,16 +23,11 @@ export class CandidateService {
   ): Promise<ResponseStatus> {
     try {
       await this.database.$transaction([
-        this.database.professional_details.upsert({
-          create: {
-            professionalSummary: dto.professionalSummary,
-            userId: userId,
-            yearsOfExperience: 0, // Replace 0 with the actual value
-          },
+        this.database.professional_details.update({
           where: {
             userId: userId,
           },
-          update: {
+          data: {
             professionalSummary: dto.professionalSummary,
           },
         }),
