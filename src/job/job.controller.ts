@@ -31,10 +31,9 @@ export class JobController {
 
   @Get()
   getJobs(
-    @GetUser('id') userId: number,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @GetUser('userId') userId: number,
     @Query('search') search?: string,
+    @Query('currentPage') currentPage: number = 1, // Declare currentPage variable with a default value of 1
     // @Query('role') role: string,
     // @Query('location') location: string,
     // @Query('experience') experience: string,
@@ -42,14 +41,8 @@ export class JobController {
     // @Query('jobDuration') jobDuration: string,
   ) {
     return this.jobService.getJobs(userId, {
-      limit: limit || 10,
-      offset,
       search,
-      // role,
-      // location,
-      // experience,
-      // workType,
-      // jobDuration,
+      currentPage,
     });
   }
 
@@ -76,7 +69,7 @@ export class JobController {
 
   @Get(':id')
   getJobById(
-    @GetUser('id') userId: number,
+    @GetUser('userId') userId: number,
     @Param('id', ParseIntPipe) jobId: number,
   ) {
     return this.jobService.getJobById(userId, jobId);

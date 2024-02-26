@@ -151,16 +151,24 @@ export class JobService {
     userId: number,
     options: JobSearchOptions,
   ): Promise<ResponseStatus> {
-    const { limit, offset } = options;
-    const jobs = await this.database.job.findMany({
-      where: {
-        postedById: userId,
-      },
+    const page = Number(options.currentPage);
+    const paginate: PaginateFunction = paginator({
+      perPage: 10,
+      page,
+    });
+    const jobs = await paginate(this.database.job, {
       include: {
         jobDetails: true,
       },
-      take: parseInt(limit as any),
-      skip: offset,
+      where: {
+        postedById: userId,
+        jobDetails: {
+          title: {
+            contains: options.search,
+          },
+        },
+      },
+      skip: (page - 1) * 10,
     });
     return {
       success: true,
