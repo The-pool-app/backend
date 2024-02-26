@@ -31,7 +31,7 @@ export class PaymentController {
   }
   @Get('all-plans')
   findAll(@GetUser('userId') userId: number) {
-    return this.paymentService.findAllPlansForAUser(userId);
+    return this.paymentService.FindAllPlansForAUserV2(userId);
   }
 
   @Patch('update-plan/:id')

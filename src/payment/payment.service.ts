@@ -78,7 +78,9 @@ export class PaymentService {
       data: plans,
     };
   }
-
+  async FindAllPlansForAUserV2(userId: number) {
+    console.log(userId);
+  }
   findOne(id: number) {
     return `This action returns a #${id} payment`;
   }
