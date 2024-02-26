@@ -1,6 +1,14 @@
 import { AdminService } from './admin.service';
 import { DatabaseService } from 'src/database/database.service';
-import { Controller, Delete, Get, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guard';
 
@@ -39,8 +47,20 @@ export class AdminController {
   }
 
   @Get('jobs')
-  findAllJobs() {
-    return this.adminService.findAllJobs();
+  findAllJobs(
+    @Body() currentPage: number,
+    @Query('search') search?: string,
+    @Query('experience') experience?: string,
+    @Query('workType') workType?: string,
+    @Query('jobDuration') jobDuration?: string,
+  ) {
+    return this.adminService.findAllJobs({
+      search,
+      experience,
+      workType,
+      jobDuration,
+      currentPage,
+    });
   }
 
   @Get('jobs/:id')

@@ -1,9 +1,17 @@
-import { Controller, Get, Post, Param, UseGuards, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  UseGuards,
+  Body,
+  Patch,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guard';
 import { PaymentService } from './payment.service';
 import { GetUser } from 'src/auth/decorator';
-// import { CreatePlanDto } from './dto';
+import { CreatePlanDto, UpdatePlanDto } from './dto';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Payment')
@@ -16,14 +24,20 @@ export class PaymentController {
     return this.paymentService.pay(userId, planId);
   }
 
-  // @Post('create-plan')
-  // createPlan(@Body() createPlan: CreatePlanDto) {
-  //   return this.paymentService.create(createPlan);
-  // }
-  // @Get()
-  // findAll(@GetUser('userId') userId: number) {
-  //   return this.paymentService.findAllPlans(userId);
-  // }
+  @Post('create-plan')
+  createPlan(@Body() createPlan: CreatePlanDto) {
+    console.log(createPlan);
+    return this.paymentService.create(createPlan);
+  }
+  @Get('all-plans')
+  findAll(@GetUser('userId') userId: number) {
+    return this.paymentService.findAllPlansForAUser(userId);
+  }
+
+  @Patch('update-plan/:id')
+  updatePlan(@Param('id') id: string, @Body() updatePlan: UpdatePlanDto) {
+    return this.paymentService.updatePlan(id, updatePlan);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

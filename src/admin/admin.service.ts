@@ -1,9 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
+import { JobService } from 'src/job/job.service';
 
 @Injectable()
 export class AdminService {
-  constructor(private database: DatabaseService) {}
+  constructor(
+    private database: DatabaseService,
+    private jobService: JobService,
+  ) {}
   findAllSubscriptions() {
     // fetch all subscriptions from paystack
     // url="https://api.paystack.co/subscription"
@@ -34,8 +38,20 @@ export class AdminService {
       throw new BadRequestException(error.message);
     }
   }
-  findAllJobs() {
-    return this.database.job.findMany();
+  async findAllJobs({
+    search,
+    experience,
+    workType,
+    jobDuration,
+    currentPage,
+  }) {
+    return this.jobService.getJobBoard({
+      currentPage,
+      search,
+      experience,
+      workType,
+      jobDuration,
+    });
   }
   create(createAdminInput: any) {
     console.log(createAdminInput);

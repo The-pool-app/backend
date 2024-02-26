@@ -194,7 +194,7 @@ export class CandidateService {
               lastName: dto.lastName,
               phoneNumber: dto.phoneNumber,
               meansOfIdentification: dto.meansOfIdentification,
-            }
+            },
           },
           professional_details: {
             update: {
