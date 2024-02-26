@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import * as https from 'https';
 import { DatabaseService } from 'src/database/database.service';
 import { CreatePlanDto, UpdatePlanDto } from './dto';
-import { IPlanCategory, ResponseStatus } from 'src/utils/types';
+import { ResponseStatus } from 'src/utils/types';
 import { UserRole } from '@prisma/client';
 
 @Injectable()
@@ -64,19 +64,14 @@ export class PaymentService {
         id: userId,
       },
     });
-    const plans = await this.database.subscription_type.findMany(
-      user.roleId === UserRole.CANDIDATE
-        ? {
-            where: {
-              category: IPlanCategory.CANDIDATE,
-            },
-          }
-        : {
-            where: {
-              category: IPlanCategory.RECRUITER,
-            },
-          },
-    );
+    const plans = await this.database.subscription_type.findMany({
+      where: {
+        category:
+          user.roleId === UserRole.CANDIDATE
+            ? UserRole.CANDIDATE
+            : UserRole.RECRUITER,
+      },
+    });
     return {
       success: true,
       message: 'Plans retrieved successfully',
