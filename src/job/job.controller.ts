@@ -59,17 +59,14 @@ export class JobController {
   }
   @Get('job-board')
   getJobBoard(
-    @GetUser('userId') userId: number,
-    @Query('limit') limit?: number,
-    @Query('offset') offset?: number,
+    @Body() currentPage: number, 
     @Query('search') search?: string,
     @Query('experience') experience?: string,
     @Query('workType') workType?: string,
     @Query('jobDuration') jobDuration?: string,
   ) {
     return this.jobService.getJobBoard({
-      limit: limit || 10,
-      offset,
+      currentPage,
       search,
       experience,
       workType,

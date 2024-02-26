@@ -111,8 +111,7 @@ export class JobService {
     }
   }
   async getJobBoard({
-    limit,
-    offset,
+    currentPage,
     search,
     experience,
     workType,
@@ -124,7 +123,22 @@ export class JobService {
     // get all jobs that are not draft
     // get all jobs that are not private
     try {
-      return paginate(this.database.job, { limit, offset });
+      return paginate(this.database.job, {
+        include: {
+          jobDetails: true,
+        },
+        where: {
+          jobDetails: {
+            title: {
+              contains: search,
+            },
+            experience: experience as any,
+            workType: workType as any,
+            jobDuration: jobDuration as any,
+          },
+        },
+        skip: (currentPage - 1) * 10,
+      });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
