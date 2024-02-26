@@ -174,7 +174,7 @@ export class RecruiterService {
             create: {
               userId: userId,
               jobRole: dto.jobRole,
-              yearsOfExperience: dto.yearsOfExperience,
+              yearsOfExperience: Number(dto.yearsOfExperience),
             },
           },
         },

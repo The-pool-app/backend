@@ -8,7 +8,15 @@ import { DatabaseService } from '../database/database.service';
 import { CreateJobDto, EditJobDto } from './dto';
 import { JobSearchOptions } from './dto';
 import { faker } from '@faker-js/faker';
+import { ResponseStatus } from 'src/utils/types';
+import {
+  PaginateFunction,
+  PaginatedResult,
+  paginator,
+} from 'src/utils/paginator';
+import { Job } from '@prisma/client';
 
+const paginate: PaginateFunction = paginator({ perPage: 10 });
 @Injectable()
 export class JobService {
   constructor(private database: DatabaseService) {}
@@ -102,50 +110,45 @@ export class JobService {
       throw new BadRequestException(error.message);
     }
   }
-  getJobBoard({ limit, offset, search, experience, workType, jobDuration }) {
+  async getJobBoard({
+    limit,
+    offset,
+    search,
+    experience,
+    workType,
+    jobDuration,
+  }): Promise<PaginatedResult<Job>> {
     // get all jobs that are not expired
     // get all jobs that are not filled
     // get all jobs that are not deleted
     // get all jobs that are not draft
     // get all jobs that are not private
     try {
-      return this.database.job.findMany({
-        where: {
-          jobDetails: {
-            title: {
-              contains: search,
-            },
-            experience: {
-              equals: experience,
-            },
-            workType: {
-              equals: workType,
-            },
-            jobDuration: {
-              equals: jobDuration,
-            },
-          },
-        },
-        include: {
-          postedBy: true,
-          jobDetails: true,
-        },
-        take: parseInt(limit as any),
-        skip: offset,
-      });
+      return paginate(this.database.job, { limit, offset });
     } catch (error) {
       throw new BadRequestException(error.message);
     }
   }
-  async getJobs(userId: number, options: JobSearchOptions) {
+  async getJobs(
+    userId: number,
+    options: JobSearchOptions,
+  ): Promise<ResponseStatus> {
     const { limit, offset } = options;
-    return this.database.job.findMany({
+    const jobs = await this.database.job.findMany({
       where: {
         postedById: userId,
+      },
+      include: {
+        jobDetails: true,
       },
       take: parseInt(limit as any),
       skip: offset,
     });
+    return {
+      success: true,
+      message: 'Jobs retrieved successfully',
+      data: jobs,
+    };
   }
   async getJobById(userId: number, jobId: number) {
     return this.database.job.findFirst({

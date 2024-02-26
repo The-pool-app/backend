@@ -192,7 +192,7 @@ export class CandidateService {
             create: {
               userId: userId,
               jobRole: dto.jobRole,
-              yearsOfExperience: dto.yearsOfExperience,
+              yearsOfExperience: Number(dto.yearsOfExperience),
             },
           },
         },
