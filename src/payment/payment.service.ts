@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as https from 'https';
+// import * as https from 'https';
 import { DatabaseService } from 'src/database/database.service';
 import { CreatePlanDto, UpdatePlanDto } from './dto';
 import { ResponseStatus } from 'src/utils/types';
@@ -14,14 +14,14 @@ export class PaymentService {
   ) {}
   async create(dto: CreatePlanDto): Promise<ResponseStatus> {
     try {
-      const newPlan = await this.database.subscription_type.create({
+      const newPlan = await this.database.subscription_plans.create({
         data: {
           name: dto.planName,
           description: dto.description,
           price: Number(dto.price),
           planId: dto.planId,
           category: dto.category,
-          expiresIn: dto.duration, // Convert duration to a string
+          expiresIn: dto.duration,
         },
       });
       return {
@@ -35,7 +35,7 @@ export class PaymentService {
   }
   async updatePlan(planId, dto: UpdatePlanDto): Promise<ResponseStatus> {
     try {
-      const updatedPlan = await this.database.subscription_type.update({
+      const updatedPlan = await this.database.subscription_plans.update({
         where: {
           id: Number(planId),
         },
@@ -64,7 +64,7 @@ export class PaymentService {
         id: userId,
       },
     });
-    const plans = await this.database.subscription_type.findMany({
+    const plans = await this.database.subscription_plans.findMany({
       where: {
         category:
           user.roleId === UserRole.CANDIDATE
@@ -91,7 +91,7 @@ export class PaymentService {
       },
     });
     delete user.pin;
-    const plan = await this.database.subscription_type.findUnique({
+    const plan = await this.database.subscription_plans.findUnique({
       where: {
         id: Number(planId['planId']),
       },

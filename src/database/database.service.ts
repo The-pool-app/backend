@@ -25,7 +25,7 @@ export class DatabaseService extends PrismaClient {
       this.work_experience.deleteMany(),
       this.personal_details.deleteMany(),
       this.professional_details.deleteMany(),
-      this.subscription_type.deleteMany(),
+      this.subscription_plans.deleteMany(),
       this.subscription.deleteMany(),
       this.job.deleteMany(),
       this.user_activities.deleteMany(),

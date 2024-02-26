@@ -45,7 +45,7 @@ enum Gender {
   FEMALE
 }
 
-model subscription_type {
+model subscription_plans {
   id          Int      @id @default(autoincrement())
   name        String
   description String
@@ -60,13 +60,13 @@ model subscription_type {
 }
 
 model subscription {
-  id                 Int                @id @default(autoincrement())
+  id                 Int                 @id @default(autoincrement())
   userId             Int
-  subscriptionTypeId Int
-  createdAt          DateTime           @default(now())
-  updatedAt          DateTime           @updatedAt
-  user               User               @relation(fields: [userId], references: [id])
-  subscription_type  subscription_type? @relation(fields: [subscriptionTypeId], references: [id])
+  subscriptionPlanId Int
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  user               User                @relation(fields: [userId], references: [id])
+  subscription_type  subscription_plans? @relation(fields: [subscriptionPlanId], references: [id])
 }
 
 model messages {
