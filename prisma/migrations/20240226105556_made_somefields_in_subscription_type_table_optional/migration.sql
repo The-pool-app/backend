@@ -1,5 +1,0 @@
--- AlterTable
-ALTER TABLE "subscription_type" ALTER COLUMN "name" DROP NOT NULL,
-ALTER COLUMN "description" DROP NOT NULL,
-ALTER COLUMN "price" DROP NOT NULL,
-ALTER COLUMN "planID" DROP NOT NULL;

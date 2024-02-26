@@ -1,9 +1,0 @@
--- AlterTable
-ALTER TABLE "personal_details" ALTER COLUMN "firstName" DROP NOT NULL,
-ALTER COLUMN "lastName" DROP NOT NULL,
-ALTER COLUMN "phoneNumber" DROP NOT NULL,
-ALTER COLUMN "sex" DROP NOT NULL,
-ALTER COLUMN "dateOfBirth" DROP NOT NULL,
-ALTER COLUMN "meansOfIdentification" DROP NOT NULL,
-ALTER COLUMN "profilePicture" DROP NOT NULL,
-ALTER COLUMN "profileVideo" DROP NOT NULL;
