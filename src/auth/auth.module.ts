@@ -9,7 +9,7 @@ import { GoogleStrategy } from './strategy';
 @Module({
   imports: [
     JwtModule.register({
-      signOptions: { expiresIn: 60 * 60 * 24 },
+      signOptions: { expiresIn: 1000 * 60 * 60 * 24 },
     }),
   ],
   controllers: [AuthController],
