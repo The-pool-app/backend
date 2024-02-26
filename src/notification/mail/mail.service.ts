@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { Client, SendEmailV3_1, LibraryResponse } from 'node-mailjet';
@@ -56,10 +56,10 @@ export class MailService {
 
     const { Status } = result.body.Messages[0];
     if (Status) {
-      console.log(' Sending mail with mailjet successful');
+      Logger.log(' Sending mail with mailjet successful');
       // console.log(result.body);
       return;
     }
-    console.log(' Sending mail with mailjet not successful');
+    Logger.log(' Sending mail with mailjet not successful');
   }
 }
