@@ -1,9 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { v2 as cloudinary } from 'cloudinary';
+import { Injectable, Logger } from '@nestjs/common';
+import { UploadApiResponse, v2 as cloudinary } from 'cloudinary';
+import * as fs from 'fs';
 
 @Injectable()
 export class CloudinaryService {
-  async uploadVideo(file: Express.Multer.File) {
+  // upload asset automatically
+  async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
+    try {
+      const byteArrayBuffer = fs.readFileSync(file.path);
+      const uploadResult = await new Promise((resolve) => {
+        cloudinary.uploader
+          .upload_stream((error, uploadResult) => {
+            return resolve(uploadResult);
+          })
+          .end(byteArrayBuffer);
+      });
+      return uploadResult as UploadApiResponse;
+    } catch (error) {
+      Logger.log(error.message);
+      console.log(error);
+      throw new Error('Failed to upload asset');
+    }
+  }
+  async uploadVideo(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -17,7 +36,7 @@ export class CloudinaryService {
           }
         },
       );
-      uploadStream.end(file.buffer);
+      return uploadStream.end(file.buffer);
     });
   }
   async getThumbnail(publicId: string) {
@@ -41,5 +60,15 @@ export class CloudinaryService {
       flags: 'streaming_attachment',
     });
     return videoUrl;
+  }
+  // get asset url
+  async getAssetUrl(assetId: string): Promise<any> {
+    try {
+      const result = await cloudinary.api.resource(assetId);
+      return result;
+    } catch (error) {
+      Logger.log(error.message);
+      throw new Error('Failed to get asset url');
+    }
   }
 }

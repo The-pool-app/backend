@@ -2,14 +2,12 @@ import {
   BadRequestException,
   Inject,
   Injectable,
-  Logger,
   forwardRef,
 } from '@nestjs/common';
 import {
   CreateCVDto,
   PersonalPreferenceDto,
   InterestsDto,
-  profilePictureUploadDto,
   SkillsDto,
   UpdatePersonalDetailsDto,
 } from '../dto';
@@ -124,38 +122,9 @@ export class CandidateService {
   }
   async uploadProfilePicture(
     userId: number,
-    profileDto: profilePictureUploadDto,
+    profilePicture: Express.Multer.File,
   ): Promise<ResponseStatus> {
-    try {
-      const profilePicture = JSON.stringify(profileDto); // Convert profileDto to a string
-      if (!profileDto.file) {
-        throw new BadRequestException('Profile picture is required');
-      }
-      const mimeType = profileDto.file.mimetype;
-      if (!mimeType.includes('image')) {
-        throw new BadRequestException(
-          'Invalid file type. Only images are allowed',
-        );
-      }
-      await this.database.user.update({
-        where: { id: userId },
-        data: {
-          userDetail: {
-            update: {
-              profilePicture: profilePicture, // Assign the string value to profilePicture field
-            },
-          },
-        },
-      });
-      return {
-        success: true,
-        message: 'Profile picture uploaded successfully',
-      };
-    } catch (error) {
-      throw new BadRequestException(
-        'Invalid file type. Only PNG and JPEG are allowed',
-      );
-    }
+    return this.userService.uploadProfilePicture(userId, profilePicture);
   }
   async addSkills(userId: number, dto: SkillsDto): Promise<ResponseStatus> {
     try {
@@ -190,37 +159,6 @@ export class CandidateService {
     userId: number,
     file: Express.Multer.File,
   ): Promise<ResponseStatus> {
-    try {
-      if (file.mimetype !== 'video/mp4') {
-        throw new BadRequestException(
-          'Invalid file type. Only videos are allowed',
-        );
-      }
-      const user = await this.database.user.findUnique({
-        where: { id: userId },
-      });
-      if (!user) {
-        throw new BadRequestException('User not found');
-      }
-      // store the video in a blob storage
-      // const videoUrl = await this.videoServer.uploadVideo(file);
-      let videoUrl;
-      // return the url
-      // update the user profile video field with the url
-      await this.database.user.update({
-        where: { id: userId },
-        data: {
-          userDetail: {
-            update: {
-              profileVideo: videoUrl,
-            },
-          },
-        },
-      });
-      return { success: true, message: 'Video uploaded successfully' };
-    } catch (error) {
-      Logger.log(error.message);
-      throw new BadRequestException("Couldn't upload video");
-    }
+    return this.userService.uploadVideo(userId, file);
   }
 }

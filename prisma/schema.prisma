@@ -204,6 +204,7 @@ model media {
   id        Int      @id @default(autoincrement())
   userId    Int
   mediaType String
+  mediaPublicId String
   mediaUrl  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

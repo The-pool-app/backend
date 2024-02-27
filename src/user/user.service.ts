@@ -5,7 +5,6 @@ import {
   PersonalPreferenceDto,
   SkillsDto,
   UpdatePersonalDetailsDto,
-  profilePictureUploadDto,
 } from './dto';
 import { CloudinaryService } from './media/cloudinary.service';
 import { CreateCVDto } from './dto';
@@ -140,31 +139,39 @@ export class UserService {
   }
   async uploadProfilePicture(
     userId: number,
-    profileDto: profilePictureUploadDto,
-  ) {
+    file: Express.Multer.File,
+  ): Promise<ResponseStatus> {
     try {
-      const profilePicture = JSON.stringify(profileDto); // Convert profileDto to a string
-      if (!profileDto.file) {
-        throw new BadRequestException('Profile picture is required');
+      // check for file size
+      if (file.size > 5000000) {
+        throw new BadRequestException('File size too large');
       }
-      const mimeType = profileDto.file.mimetype;
-      if (!mimeType.includes('image')) {
+      if (file.mimetype !== 'image/png' && file.mimetype !== 'image/jpeg') {
         throw new BadRequestException(
-          'Invalid file type. Only images are allowed',
+          'Invalid file type. Only PNG and JPEG are allowed',
         );
       }
-      await this.database.user.update({
-        where: { id: userId },
+      const profilePicture = await this.videoServer.uploadImage(file);
+      const asset = await this.database.media.create({
         data: {
-          userDetail: {
-            update: {
-              profilePicture: profilePicture, // Assign the string value to profilePicture field
-            },
-          },
+          mediaPublicId: profilePicture.public_id,
+          mediaUrl: profilePicture.secure_url,
+          mediaType: profilePicture.resource_type,
+          userId: userId,
         },
       });
-      return { message: 'Profile picture uploaded successfully' };
+      await this.database.personal_details.update({
+        where: { userId },
+        data: {
+          profilePicture: asset.mediaUrl, // Assign the string value to profilePicture field
+        },
+      });
+      return {
+        success: true,
+        message: 'Profile picture uploaded successfully',
+      };
     } catch (error) {
+      Logger.log('Error uploading profile picture', error);
       throw new BadRequestException(
         'Invalid file type. Only PNG and JPEG are allowed',
       );
@@ -193,7 +200,10 @@ export class UserService {
     return { message: 'Profile deleted successfully' };
   }
 
-  async uploadVideo(userId: number, file: Express.Multer.File) {
+  async uploadVideo(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<ResponseStatus> {
     try {
       if (file.mimetype !== 'video/mp4') {
         throw new BadRequestException(
@@ -210,20 +220,29 @@ export class UserService {
       const videoUrl = await this.videoServer.uploadVideo(file);
 
       // return the url
+      const videoStore = await this.database.media.create({
+        data: {
+          mediaPublicId: videoUrl.public_id,
+          mediaUrl: videoUrl.secure_url,
+          mediaType: videoUrl.resource_type,
+          userId: userId,
+        },
+      });
       // update the user profile video field with the url
       await this.database.user.update({
         where: { id: userId },
         data: {
           userDetail: {
             update: {
-              profileVideo: videoUrl,
+              profileVideo: videoStore.mediaUrl,
             },
           },
         },
       });
-      return { message: 'Video uploaded successfully' };
+      return { success: true, message: 'Video uploaded successfully' };
     } catch (error) {
-      throw new BadRequestException(error.message);
+      Logger.error('Error uploading video', error);
+      throw new BadRequestException('Error uploading video');
     }
   }
 }

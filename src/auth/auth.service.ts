@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { LoginDto, RegisterDto, ForgotPasswordDto, UpdatePinDto } from './dto';
 import { DatabaseService } from '../database/database.service';
@@ -81,32 +82,39 @@ export class AuthService {
     };
   }
   async login(loginDto: LoginDto): Promise<ResponseStatus> {
-    const user = await this.database.personal_details.findUnique({
-      where: {
-        email: loginDto.email,
-      },
-      include: {
-        user: true,
-      },
-    });
-    if (!user) {
-      throw new ForbiddenException('Invalid credentials');
-    }
-    const isPasswordValid = await argon.verify(user.pin, loginDto.pin);
-    if (!isPasswordValid) {
-      throw new ForbiddenException('Invalid credentials');
-    }
-    const token = await this.signToken(user.userId, user.email);
-    return {
-      message: 'User login successfully',
-      success: true,
-      data: {
-        token,
-        user: {
+    try {
+      const user = await this.database.personal_details.findUnique({
+        where: {
+          email: loginDto.email,
+        },
+        include: {
+          user: {
+            select: {
+              roleId: true,
+            },
+          },
+        },
+      });
+      if (!user) {
+        throw new ForbiddenException('Invalid credentials');
+      }
+      const isPasswordValid = await argon.verify(user.pin, loginDto.pin);
+      if (!isPasswordValid) {
+        throw new ForbiddenException('Invalid credentials');
+      }
+      const token = await this.signToken(user.userId, user.email);
+      return {
+        message: 'User login successfully',
+        success: true,
+        data: {
+          token,
           role: user.user.roleId,
         },
-      },
-    };
+      };
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException('Error logging in');
+    }
   }
   async forgotPin(resetPasswordDto: ForgotPasswordDto) {
     try {

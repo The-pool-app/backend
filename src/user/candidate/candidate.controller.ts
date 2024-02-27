@@ -94,7 +94,7 @@ export class CandidateController {
   }
 
   @Post('profile-picture')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('profilePicture'))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload a profile picture',
@@ -102,9 +102,9 @@ export class CandidateController {
   })
   uploadProfilePicture(
     @GetUser('userId') userId: number,
-    @UploadedFile() profilePicture: profilePictureUploadDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.candidateService.uploadProfilePicture(userId, profilePicture);
+    return this.candidateService.uploadProfilePicture(userId, file);
   }
 
   @Post('interests')
