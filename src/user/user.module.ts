@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { CloudinaryModule } from './media/cloudinary.module';
@@ -11,8 +11,8 @@ import { RouterModule } from '@nestjs/core';
   controllers: [UserController],
   imports: [
     CloudinaryModule,
-    CandidateModule,
-    RecruiterModule,
+    forwardRef(() => CandidateModule),
+    forwardRef(() => RecruiterModule),
     RouterModule.register([
       {
         path: 'user',
@@ -30,5 +30,6 @@ import { RouterModule } from '@nestjs/core';
       },
     ]),
   ],
+  exports: [UserService],
 })
 export class UserModule {}

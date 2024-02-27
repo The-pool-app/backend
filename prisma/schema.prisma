@@ -100,18 +100,19 @@ model company {
 }
 
 model User {
-  id                         Int                   @id @default(autoincrement())
-  roleId                     UserRole              @default(CANDIDATE)
-  userDetail                 personal_details?
-  activities                 user_activities[]
-  education                  education[]
-  work_experience            work_experience[]
-  PasswordResetToken         PasswordResetToken[]
-  jobs                       Job[]
-  subscription               subscription[]
-  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
-  professional_detailsUserId Int?
-  company                    company[]
+  id                     Int                   @id @default(autoincrement())
+  roleId                 UserRole              @default(CANDIDATE)
+  userDetail             personal_details?
+  activities             user_activities[]
+  education              education[]
+  work_experience        work_experience[]
+  PasswordResetToken     PasswordResetToken[]
+  jobs                   Job[]
+  subscription           subscription[]
+  professional_details   professional_details?
+  professional_detailsId Int?
+  company                company[]
+  media                  media[]
 }
 
 model Job {
@@ -129,26 +130,26 @@ model PasswordResetToken {
 }
 
 model education {
-  userId                     Int
-  user                       User                  @relation(fields: [userId], references: [id])
-  schoolName                 String                @id
-  degree                     String
-  grade                      String
-  graduationDate             DateTime
-  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
-  professional_detailsUserId Int?
+  userId                 Int
+  user                   User                  @relation(fields: [userId], references: [id])
+  schoolName             String                @id
+  degree                 String
+  grade                  String
+  graduationDate         DateTime
+  professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
+  professional_detailsId Int?
 }
 
 model work_experience {
-  userId                     Int
-  user                       User                  @relation(fields: [userId], references: [id])
-  companyName                String                @id
-  jobTitle                   String
-  startDate                  DateTime
-  endDate                    DateTime
-  description                String
-  professional_details       professional_details? @relation(fields: [professional_detailsUserId], references: [userId])
-  professional_detailsUserId Int?
+  userId                 Int
+  user                   User                  @relation(fields: [userId], references: [id])
+  companyName            String                @id
+  jobTitle               String
+  startDate              DateTime
+  endDate                DateTime
+  description            String
+  professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
+  professional_detailsId Int?
 }
 
 model user_activities {
@@ -181,7 +182,8 @@ model role {
 }
 
 model professional_details {
-  userId              Int                      @id
+  id                  Int                      @id @default(autoincrement())
+  userId              Int?                     @unique
   status              ApplicantStatus          @default(NOT_LOOKING)
   jobRole             String?
   yearsOfExperience   Int
@@ -195,5 +197,15 @@ model professional_details {
   education           education[]
   allWorkExperience   work_experience[]
   createdAt           DateTime                 @default(now())
-  User                User[]
+  user                User?                    @relation(fields: [userId], references: [id])
+}
+
+model media {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  mediaType String
+  mediaUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
 }

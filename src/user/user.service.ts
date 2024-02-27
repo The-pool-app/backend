@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { DatabaseService } from '../database/database.service';
 import {
   InterestsDto,
@@ -9,6 +9,7 @@ import {
 } from './dto';
 import { CloudinaryService } from './media/cloudinary.service';
 import { CreateCVDto } from './dto';
+import { ResponseStatus } from 'src/utils/types';
 
 @Injectable()
 export class UserService {
@@ -87,6 +88,41 @@ export class UserService {
     }
   }
 
+  async updatePersonalDetails(
+    userId: number,
+    dto: UpdatePersonalDetailsDto,
+  ): Promise<ResponseStatus> {
+    try {
+      await this.database.$transaction([
+        this.database.personal_details.update({
+          where: { userId: userId },
+          data: {
+            sex: dto.sex,
+            firstName: dto.firstName,
+            lastName: dto.lastName,
+            dateOfBirth: dto.dateOfBirth,
+            phoneNumber: dto.phoneNumber,
+            meansOfIdentification: dto.meansOfIdentification,
+          },
+        }),
+        this.database.professional_details.create({
+          data: {
+            userId: userId,
+            jobRole: dto.jobRole,
+            yearsOfExperience: Number(dto.yearsOfExperience),
+          },
+        }),
+      ]);
+      return {
+        success: true,
+        message: 'Personal details updated successfully',
+      };
+    } catch (error) {
+      Logger.error('Error updating personal details', error);
+      throw new BadRequestException('Error updating personal details');
+    }
+  }
+
   async addInterests(userId: number, dto: InterestsDto) {
     try {
       await this.database.professional_details.update({
@@ -145,35 +181,6 @@ export class UserService {
         },
       });
       return { message: 'Skills added successfully' };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
-  }
-  async updatePersonalDetails(userId: number, dto: UpdatePersonalDetailsDto) {
-    try {
-      await this.database.user.update({
-        where: { id: userId },
-        data: {
-          userDetail: {
-            update: {
-              dateOfBirth: dto.dateOfBirth,
-              firstName: dto.firstName,
-              lastName: dto.lastName,
-              phoneNumber: dto.phoneNumber,
-              sex: dto.sex,
-              meansOfIdentification: dto.meansOfIdentification,
-            },
-          },
-          professional_details: {
-            create: {
-              userId: userId,
-              jobRole: dto.jobRole,
-              yearsOfExperience: dto.yearsOfExperience,
-            },
-          },
-        },
-      });
-      return { message: 'Personal details updated successfully' };
     } catch (error) {
       throw new BadRequestException(error.message);
     }

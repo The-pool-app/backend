@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { DatabaseService } from 'src/database/database.service';
 import { ResponseStatus } from 'src/utils/types';
 import {
@@ -7,15 +12,16 @@ import {
   SkillsDto,
   UpdatePersonalDetailsDto,
 } from '../dto';
-import { CloudinaryService } from '../media/cloudinary.service';
 import { BusinessDetailsDto } from './dto';
 import { UserRole } from '@prisma/client';
+import { UserService } from '../user.service';
 
 @Injectable()
 export class RecruiterService {
   constructor(
     private database: DatabaseService,
-    private videoServer: CloudinaryService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
   ) {}
   async addBusinessDetails(
     userId: number,
@@ -48,11 +54,13 @@ export class RecruiterService {
   async getAllCandidates(): Promise<ResponseStatus> {
     try {
       const candidates = await this.database.professional_details.findMany({
+        where: {
+          user: {
+            roleId: UserRole.CANDIDATE,
+          },
+        },
         include: {
-          User: {
-            where: {
-              roleId: UserRole.CANDIDATE,
-            },
+          user: {
             include: {
               userDetail: true,
               work_experience: true,
@@ -156,36 +164,7 @@ export class RecruiterService {
     userId: number,
     dto: UpdatePersonalDetailsDto,
   ): Promise<ResponseStatus> {
-    try {
-      await this.database.user.update({
-        where: { id: userId },
-        data: {
-          userDetail: {
-            update: {
-              dateOfBirth: dto.dateOfBirth,
-              firstName: dto.firstName,
-              lastName: dto.lastName,
-              phoneNumber: dto.phoneNumber,
-              sex: dto.sex,
-              meansOfIdentification: dto.meansOfIdentification,
-            },
-          },
-          professional_details: {
-            create: {
-              userId: userId,
-              jobRole: dto.jobRole,
-              yearsOfExperience: Number(dto.yearsOfExperience),
-            },
-          },
-        },
-      });
-      return {
-        success: true,
-        message: 'Personal details updated successfully',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    return this.userService.updatePersonalDetails(userId, dto);
   }
   async deleteProfile(userId: number): Promise<ResponseStatus> {
     await this.database.$transaction([

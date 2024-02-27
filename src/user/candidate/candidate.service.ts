@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  Logger,
+  forwardRef,
+} from '@nestjs/common';
 import {
   CreateCVDto,
   PersonalPreferenceDto,
@@ -8,14 +14,15 @@ import {
   UpdatePersonalDetailsDto,
 } from '../dto';
 import { DatabaseService } from 'src/database/database.service';
-import { CloudinaryService } from '../media/cloudinary.service';
 import { ResponseStatus } from 'src/utils/types';
+import { UserService } from '../user.service';
 
 @Injectable()
 export class CandidateService {
   constructor(
     private database: DatabaseService,
-    private videoServer: CloudinaryService,
+    @Inject(forwardRef(() => UserService))
+    private userService: UserService,
   ) {}
   async addProfessionalDetails(
     userId: number,
@@ -169,44 +176,7 @@ export class CandidateService {
     userId: number,
     dto: UpdatePersonalDetailsDto,
   ): Promise<ResponseStatus> {
-    try {
-      await this.database.user.upsert({
-        where: { id: userId },
-        create: {
-          professional_details: {
-            create: {
-              userId: userId,
-              jobRole: dto.jobRole,
-              yearsOfExperience: Number(dto.yearsOfExperience),
-            },
-          },
-        },
-        update: {
-          userDetail: {
-            update: {
-              dateOfBirth: dto.dateOfBirth,
-              firstName: dto.firstName,
-              lastName: dto.lastName,
-              phoneNumber: dto.phoneNumber,
-              meansOfIdentification: dto.meansOfIdentification,
-            },
-          },
-          professional_details: {
-            update: {
-              userId: userId,
-              jobRole: dto.jobRole,
-              yearsOfExperience: Number(dto.yearsOfExperience),
-            },
-          },
-        },
-      });
-      return {
-        success: true,
-        message: 'Personal details updated successfully',
-      };
-    } catch (error) {
-      throw new BadRequestException(error.message);
-    }
+    return this.userService.updatePersonalDetails(userId, dto);
   }
   async deleteProfile(userId: number): Promise<ResponseStatus> {
     await this.database.$transaction([
@@ -233,8 +203,8 @@ export class CandidateService {
         throw new BadRequestException('User not found');
       }
       // store the video in a blob storage
-      const videoUrl = await this.videoServer.uploadVideo(file);
-
+      // const videoUrl = await this.videoServer.uploadVideo(file);
+      let videoUrl;
       // return the url
       // update the user profile video field with the url
       await this.database.user.update({
@@ -249,7 +219,8 @@ export class CandidateService {
       });
       return { success: true, message: 'Video uploaded successfully' };
     } catch (error) {
-      throw new BadRequestException(error.message);
+      Logger.log(error.message);
+      throw new BadRequestException("Couldn't upload video");
     }
   }
 }
