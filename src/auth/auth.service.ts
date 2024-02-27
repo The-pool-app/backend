@@ -12,6 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import { MailService } from '../notification/mail/mail.service';
 import { randomBytes, createHash } from 'crypto';
 import { UserRole } from '@prisma/client';
+import { ResponseStatus } from 'src/utils/types';
 
 @Injectable()
 export class AuthService {
@@ -79,10 +80,13 @@ export class AuthService {
       token,
     };
   }
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto): Promise<ResponseStatus> {
     const user = await this.database.personal_details.findUnique({
       where: {
         email: loginDto.email,
+      },
+      include: {
+        user: true,
       },
     });
     if (!user) {
@@ -93,7 +97,16 @@ export class AuthService {
       throw new ForbiddenException('Invalid credentials');
     }
     const token = await this.signToken(user.userId, user.email);
-    return { message: 'User login successfully', token };
+    return {
+      message: 'User login successfully',
+      success: true,
+      data: {
+        token,
+        user: {
+          role: user.user.roleId,
+        },
+      },
+    };
   }
   async forgotPin(resetPasswordDto: ForgotPasswordDto) {
     try {

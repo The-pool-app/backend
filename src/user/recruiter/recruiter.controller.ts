@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Logger,
   Patch,
   Post,
   UploadedFile,
@@ -48,7 +49,7 @@ export class RecruiterController {
       meansOfIdentification?: Express.Multer.File[];
     },
   ) {
-    console.log(files);
+    Logger.log(files);
     return this.recruiterService.updatePersonalDetails(userId, dto);
   }
 
@@ -61,6 +62,7 @@ export class RecruiterController {
   }
 
   @Post('business-details')
+  @UseInterceptors(FileInterceptor('file'))
   @ApiBody({
     description: 'Add business details to recruiter profile',
     type: BusinessDetailsDto,
@@ -68,7 +70,12 @@ export class RecruiterController {
   addBusinessDetails(
     @GetUser('userId') userId: number,
     @Body() dto: BusinessDetailsDto,
+    @UploadedFile()
+    file: {
+      CacDocs: Express.Multer.File;
+    },
   ) {
+    Logger.log(file);
     return this.recruiterService.addBusinessDetails(userId, dto);
   }
 

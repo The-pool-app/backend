@@ -7,7 +7,12 @@ export class profilePictureUploadDto {
   @IsNotEmpty()
   file: any;
 }
-
+export class CacUploadDto {
+  @ApiProperty({ type: 'string', format: 'binary' })
+  @IsMimeType()
+  @IsNotEmpty()
+  file: any;
+}
 export class SkillsDto {
   @ApiProperty()
   @IsNotEmpty()

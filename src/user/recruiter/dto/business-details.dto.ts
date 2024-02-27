@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
 
 export class BusinessDetailsDto {
@@ -15,4 +16,8 @@ export class BusinessDetailsDto {
 
   @IsNotEmpty()
   businessSector: string;
+
+  @ApiProperty({ type: 'string', format: 'binary' })
+  // @IsNotEmpty()
+  CacDocs?: any;
 }
