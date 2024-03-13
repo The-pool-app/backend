@@ -23,13 +23,14 @@ export class AuthController {
   constructor(private authService: AuthService) {}
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+    return await this.authService.register(registerDto);
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+    const data = await this.authService.login(loginDto);
+    return data;
   }
 
   @Get('register/google')

@@ -25,6 +25,7 @@ import {
 import { JwtAuthGuard } from 'src/auth/guard';
 import { RecruiterService } from './recruiter.service';
 import { BusinessDetailsDto } from './dto';
+import { diskStorage } from 'multer';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Recruiter')
@@ -80,7 +81,17 @@ export class RecruiterController {
   }
 
   @Post('profile-picture')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('profilePic', {
+      storage: diskStorage({
+        destination: './uploads', // Specify the directory where uploaded files will be stored
+        filename: (req, file, cb) => {
+          const filename = `${Date.now()}-${file.originalname}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload a profile picture',
@@ -88,8 +99,9 @@ export class RecruiterController {
   })
   uploadProfilePicture(
     @GetUser('userId') userId: number,
-    @UploadedFile() profilePicture: profilePictureUploadDto,
+    @UploadedFile() profilePicture: Express.Multer.File,
   ) {
+    console.log(userId, profilePicture);
     return this.recruiterService.uploadProfilePicture(userId, profilePicture);
   }
 

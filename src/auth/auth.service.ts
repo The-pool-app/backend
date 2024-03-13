@@ -24,8 +24,10 @@ export class AuthService {
     private notification: MailService,
   ) {}
   async register(dto: RegisterDto) {
+    console.log('---->>> Running auth -------<<<<<<<');
     const hash = await argon.hash(dto.pin);
     try {
+      console.log(hash);
       const user = await this.database.user.create({
         data: {
           userDetail: {
@@ -37,7 +39,23 @@ export class AuthService {
           roleId: dto.role as UserRole,
         },
       });
+      console.log(user);
+      await this.database.professional_details.create({
+        data: {
+          status: 'NOT_LOOKING',
+          userId: user.id,
+          // userId: user.id,
+          // user: {
+          //   connect: {
+          //     id: user.id,
+          //   },
+          // },
+          experienceLevel: 'JUNIOR',
+          yearsOfExperience: 0,
+        },
+      });
       const token = await this.signToken(user.id, dto.email);
+      console.log(token);
       await this.notification.sendMailWithMailJet(
         dto.email,
         'Welcome to the pool',
@@ -56,7 +74,7 @@ export class AuthService {
        </div>
         `,
       );
-      return { message: 'Magic link sent to email', token };
+      return { token };
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
@@ -85,7 +103,7 @@ export class AuthService {
     try {
       const user = await this.database.personal_details.findUnique({
         where: {
-          email: loginDto.email,
+          email: loginDto.email.trim(),
         },
         include: {
           user: {
@@ -95,6 +113,7 @@ export class AuthService {
           },
         },
       });
+      console.log(user);
       if (!user) {
         throw new ForbiddenException('Invalid credentials');
       }

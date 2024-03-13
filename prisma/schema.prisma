@@ -183,20 +183,20 @@ model role {
 
 model professional_details {
   id                  Int                      @id @default(autoincrement())
-  userId              Int?                     @unique
+  userId              Int                     @unique
   status              ApplicantStatus          @default(NOT_LOOKING)
-  jobRole             String?
-  yearsOfExperience   Int
-  professionalSummary String?
-  jobPreference       workType                 @default(REMOTE)
-  skills              String[]
-  interests           String[]
-  salaryRange         String?
-  experienceLevel     ApplicantExperienceLevel @default(JUNIOR)
-  highestEducation    String?
-  education           education[]
-  allWorkExperience   work_experience[]
-  createdAt           DateTime                 @default(now())
+  jobRole             String?                  @default(null)
+  yearsOfExperience   Int?                      @default(null)
+  professionalSummary String?                  @default(null)
+  jobPreference       workType?                 @default(REMOTE)
+  skills              String[]                 @default(null)
+  interests           String[]                 @default(null)
+  salaryRange         String?                  @default(null)
+  experienceLevel     ApplicantExperienceLevel? @default(JUNIOR)
+  highestEducation    String?                  @default(null)
+  education           education[]              @default(null)
+  allWorkExperience   work_experience[]        @default(null)
+  createdAt           DateTime?                 @default(now())
   user                User?                    @relation(fields: [userId], references: [id])
 }
 

@@ -22,10 +22,12 @@ export class MailService {
     console.log({ data });
   }
   async sendMailWithMailJet(to: string, subject: string, html: string) {
+    console.log('----<<<<Running mail sertvice---->>>></Running>');
     const mailjet = new Client({
       apiKey: this.config.get('MAILJET_API_KEY'),
       apiSecret: this.config.get('MAILJET_SECRET_KEY'),
     });
+    console.log(mailjet);
 
     const data: SendEmailV3_1.Body = {
       Messages: [

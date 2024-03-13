@@ -7,6 +7,7 @@ export class CloudinaryService {
   // upload asset automatically
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     try {
+      console.log(file);
       const byteArrayBuffer = fs.readFileSync(file.path);
       const uploadResult = await new Promise((resolve) => {
         cloudinary.uploader

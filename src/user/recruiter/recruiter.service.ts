@@ -1,3 +1,4 @@
+import { CloudinaryService } from './../media/cloudinary.service';
 import {
   BadRequestException,
   Inject,
@@ -8,7 +9,7 @@ import { DatabaseService } from 'src/database/database.service';
 import { ResponseStatus } from 'src/utils/types';
 import {
   PersonalPreferenceDto,
-  profilePictureUploadDto,
+  // profilePictureUploadDto,
   SkillsDto,
   UpdatePersonalDetailsDto,
 } from '../dto';
@@ -22,6 +23,7 @@ export class RecruiterService {
     private database: DatabaseService,
     @Inject(forwardRef(() => UserService))
     private userService: UserService,
+    private uploadServer: CloudinaryService,
   ) {}
   async addBusinessDetails(
     userId: number,
@@ -112,25 +114,36 @@ export class RecruiterService {
 
   async uploadProfilePicture(
     userId: number,
-    profileDto: profilePictureUploadDto,
+    profileDto: Express.Multer.File,
   ): Promise<ResponseStatus> {
     try {
-      const profilePicture = JSON.stringify(profileDto); // Convert profileDto to a string
-      if (!profileDto.file) {
-        throw new BadRequestException('Profile picture is required');
+      if (!profileDto) {
+        throw new BadRequestException('No file uploaded');
       }
-      const mimeType = profileDto.file.mimetype;
-      if (!mimeType.includes('image')) {
-        throw new BadRequestException(
-          'Invalid file type. Only images are allowed',
-        );
+      console.log(profileDto);
+      if (!profileDto.path) {
+        throw new BadRequestException('File path not provided');
       }
+      console.log(profileDto.path);
+      const image = await this.uploadServer.uploadImage(profileDto);
+      console.log(image);
+      const profilePicture = JSON.stringify(profileDto);
+      console.log(profilePicture);
+      // Convert profileDto to a string
+      const asset = await this.database.media.create({
+        data: {
+          mediaPublicId: image.public_id,
+          mediaUrl: image.secure_url,
+          mediaType: image.resource_type,
+          userId: userId,
+        },
+      });
       await this.database.user.update({
         where: { id: userId },
         data: {
           userDetail: {
             update: {
-              profilePicture: profilePicture, // Assign the string value to profilePicture field
+              profilePicture: asset.mediaUrl, // Assign the string value to profilePicture field
             },
           },
         },
@@ -140,9 +153,7 @@ export class RecruiterService {
         message: 'Profile picture uploaded successfully',
       };
     } catch (error) {
-      throw new BadRequestException(
-        'Invalid file type. Only PNG and JPEG are allowed',
-      );
+      throw new BadRequestException(error);
     }
   }
   async addSkills(userId: number, dto: SkillsDto): Promise<ResponseStatus> {

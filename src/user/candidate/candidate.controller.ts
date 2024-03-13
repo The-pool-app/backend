@@ -27,6 +27,7 @@ import {
   InterestsDto,
 } from '../dto';
 import { JwtAuthGuard } from 'src/auth/guard';
+import { diskStorage } from 'multer';
 
 @UseGuards(JwtAuthGuard)
 @ApiTags('Candidate')
@@ -94,7 +95,17 @@ export class CandidateController {
   }
 
   @Post('profile-picture')
-  @UseInterceptors(FileInterceptor('profilePicture'))
+  @UseInterceptors(
+    FileInterceptor('profilePicture', {
+      storage: diskStorage({
+        destination: './uploads', // Specify the directory where uploaded files will be stored
+        filename: (req, file, cb) => {
+          const filename = `${Date.now()}-${file.originalname}`;
+          cb(null, filename);
+        },
+      }),
+    }),
+  )
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Upload a profile picture',
