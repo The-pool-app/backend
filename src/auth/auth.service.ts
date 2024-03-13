@@ -44,12 +44,6 @@ export class AuthService {
         data: {
           status: 'NOT_LOOKING',
           userId: user.id,
-          // userId: user.id,
-          // user: {
-          //   connect: {
-          //     id: user.id,
-          //   },
-          // },
           experienceLevel: 'JUNIOR',
           yearsOfExperience: 0,
         },

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsIn, IsNotEmpty, IsString } from 'class-validator';
 import {
   workType,
   ApplicantExperienceLevel,
@@ -26,6 +26,7 @@ export class CreateJobDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  @IsIn(['REMOTE', 'ONSITE', 'HYBRID'])
   workType: workType;
 
   @ApiProperty()

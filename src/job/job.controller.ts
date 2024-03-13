@@ -11,6 +11,7 @@ import {
   HttpStatus,
   Delete,
   Query,
+  Logger,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard';
 import { JobService } from './job.service';
@@ -26,6 +27,7 @@ export class JobController {
   constructor(private jobService: JobService) {}
   @Post()
   createJob(@GetUser('userId') userId: number, @Body() dto: CreateJobDto) {
+    Logger.debug(dto.salaryRange);
     return this.jobService.createJob(userId, dto);
   }
 
