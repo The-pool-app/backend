@@ -10,5 +10,5 @@ export class LoginDto {
   @ApiProperty()
   @IsNotEmpty()
   @MinLength(4)
-  pin: string;
+  password: string;
 }

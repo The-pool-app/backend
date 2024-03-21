@@ -111,7 +111,7 @@ export class AuthService {
       if (!user) {
         throw new ForbiddenException('Invalid credentials');
       }
-      const isPasswordValid = await argon.verify(user.pin, loginDto.pin);
+      const isPasswordValid = await argon.verify(user.pin, loginDto.password);
       if (!isPasswordValid) {
         throw new ForbiddenException('Invalid credentials');
       }

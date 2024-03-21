@@ -11,7 +11,7 @@ export class RegisterDto {
   @ApiProperty()
   @IsNotEmpty()
   @MinLength(4)
-  pin: string;
+  password: string;
 
   @ApiProperty()
   @IsNotEmpty()
