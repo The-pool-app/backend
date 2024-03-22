@@ -25,7 +25,7 @@ export class AuthService {
   ) {}
   async register(dto: RegisterDto) {
     console.log('---->>> Running auth -------<<<<<<<');
-    const hash = await argon.hash(dto.pin);
+    const hash = await argon.hash(dto.password);
     try {
       console.log(hash);
       const user = await this.database.user.create({
@@ -171,7 +171,7 @@ export class AuthService {
     // if it has not expired, update the user password and return success message
     // delete the token
     try {
-      if (updatePinDto.pin !== updatePinDto.confirmPin) {
+      if (updatePinDto.password !== updatePinDto.confirmPin) {
         throw new BadRequestException('The pin does not match');
       }
       const resetPasswordToken =
@@ -204,7 +204,7 @@ export class AuthService {
           throw new BadRequestException('Invalid password reset token');
         }
 
-        const hash = await argon.hash(updatePinDto.pin);
+        const hash = await argon.hash(updatePinDto.password);
         await this.database.personal_details.update({
           where: { userId: matchedRow.userId },
           data: { pin: hash },

@@ -2,211 +2,213 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 enum UserRole {
-  RECRUITER
-  CANDIDATE
+    RECRUITER
+    CANDIDATE
+    ADMIN
+    SUPERADMIN
 }
 
 enum ApplicantExperienceLevel {
-  JUNIOR
-  MID_LEVEL
-  SENIOR
+    JUNIOR
+    MID_LEVEL
+    SENIOR
 }
 
 enum jobDuration {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  INTERNSHIP
+    FULL_TIME
+    PART_TIME
+    CONTRACT
+    INTERNSHIP
 }
 
 enum ApplicantStatus {
-  ACTIVELY_LOOKING
-  NOT_LOOKING
-  OPEN_TO_OFFERS
+    ACTIVELY_LOOKING
+    NOT_LOOKING
+    OPEN_TO_OFFERS
 }
 
 enum workType {
-  REMOTE
-  ONSITE
-  HYBRID
+    REMOTE
+    ONSITE
+    HYBRID
 }
 
 enum Gender {
-  MALE
-  FEMALE
+    MALE
+    FEMALE
 }
 
 model subscription_plans {
-  id          Int      @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  expiresIn   String
-  planId      String   @default("Sample Plan")
-  category    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+    id          Int      @id @default(autoincrement())
+    name        String
+    description String
+    price       Float
+    expiresIn   String
+    planId      String   @default("Sample Plan")
+    category    String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
 
-  subscription subscription[]
+    subscription subscription[]
 }
 
 model subscription {
-  id                 Int                 @id @default(autoincrement())
-  userId             Int
-  subscriptionPlanId Int
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  user               User                @relation(fields: [userId], references: [id])
-  subscription_type  subscription_plans? @relation(fields: [subscriptionPlanId], references: [id])
+    id                 Int                 @id @default(autoincrement())
+    userId             Int
+    subscriptionPlanId Int
+    createdAt          DateTime            @default(now())
+    updatedAt          DateTime            @updatedAt
+    user               User                @relation(fields: [userId], references: [id])
+    subscription_type  subscription_plans? @relation(fields: [subscriptionPlanId], references: [id])
 }
 
 model messages {
-  id         String   @id @default(uuid())
-  content    String
-  senderId   Int
-  receiverId Int
-  createdAt  DateTime @default(now())
+    id         String   @id @default(uuid())
+    content    String
+    senderId   Int
+    receiverId Int
+    createdAt  DateTime @default(now())
 }
 
 model job_details {
-  jobId          Int                      @id
-  title          String
-  jobDescription String
-  workType       workType
-  jobDuration    jobDuration
-  experience     ApplicantExperienceLevel
-  salaryRange    String
-  Job            Job?                     @relation(fields: [jobId], references: [id])
+    jobId          Int                      @id
+    title          String
+    jobDescription String
+    workType       workType
+    jobDuration    jobDuration
+    experience     ApplicantExperienceLevel
+    salaryRange    String
+    Job            Job?                     @relation(fields: [jobId], references: [id])
 }
 
 model company {
-  name               String @id
-  createdBy          Int
-  User               User   @relation(fields: [createdBy], references: [id])
-  location           String
-  website            String
-  registrationNumber String
-  businessSector     String
-  jobs               Int[]
+    name               String @id
+    createdBy          Int
+    User               User   @relation(fields: [createdBy], references: [id])
+    location           String
+    website            String
+    registrationNumber String
+    businessSector     String
+    jobs               Int[]
 }
 
 model User {
-  id                     Int                   @id @default(autoincrement())
-  roleId                 UserRole              @default(CANDIDATE)
-  userDetail             personal_details?
-  activities             user_activities[]
-  education              education[]
-  work_experience        work_experience[]
-  PasswordResetToken     PasswordResetToken[]
-  jobs                   Job[]
-  subscription           subscription[]
-  professional_details   professional_details?
-  professional_detailsId Int?
-  company                company[]
-  media                  media[]
+    id                     Int                   @id @default(autoincrement())
+    roleId                 UserRole              @default(CANDIDATE)
+    userDetail             personal_details?
+    activities             user_activities[]
+    education              education[]
+    work_experience        work_experience[]
+    PasswordResetToken     PasswordResetToken[]
+    jobs                   Job[]
+    subscription           subscription[]
+    professional_details   professional_details?
+    professional_detailsId Int?
+    company                company[]
+    media                  media[]
 }
 
 model Job {
-  id         Int          @id @default(autoincrement())
-  jobDetails job_details?
-  postedById Int
-  postedBy   User         @relation(fields: [postedById], references: [id])
+    id         Int          @id @default(autoincrement())
+    jobDetails job_details?
+    postedById Int
+    postedBy   User         @relation(fields: [postedById], references: [id])
 }
 
 model PasswordResetToken {
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  token     String   @id
-  createdAt DateTime @default(now())
+    userId    Int
+    user      User     @relation(fields: [userId], references: [id])
+    token     String   @id
+    createdAt DateTime @default(now())
 }
 
 model education {
-  userId                 Int
-  user                   User                  @relation(fields: [userId], references: [id])
-  schoolName             String                @id
-  degree                 String
-  grade                  String
-  graduationDate         DateTime
-  professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
-  professional_detailsId Int?
+    userId                 Int
+    user                   User                  @relation(fields: [userId], references: [id])
+    schoolName             String                @id
+    degree                 String
+    grade                  String
+    graduationDate         DateTime
+    professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
+    professional_detailsId Int?
 }
 
 model work_experience {
-  userId                 Int
-  user                   User                  @relation(fields: [userId], references: [id])
-  companyName            String                @id
-  jobTitle               String
-  startDate              DateTime
-  endDate                DateTime
-  description            String
-  professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
-  professional_detailsId Int?
+    userId                 Int
+    user                   User                  @relation(fields: [userId], references: [id])
+    companyName            String                @id
+    jobTitle               String
+    startDate              DateTime
+    endDate                DateTime
+    description            String
+    professional_details   professional_details? @relation(fields: [professional_detailsId], references: [id])
+    professional_detailsId Int?
 }
 
 model user_activities {
-  userId  Int    @id
-  user    User   @relation(fields: [userId], references: [id])
-  content String
+    userId  Int    @id
+    user    User   @relation(fields: [userId], references: [id])
+    content String
 }
 
 model personal_details {
-  userId                Int       @unique
-  email                 String    @id @unique
-  pin                   String
-  firstName             String?
-  lastName              String?
-  phoneNumber           String?
-  location              String?
-  sex                   Gender?
-  dateOfBirth           DateTime?
-  meansOfIdentification String?
-  profilePicture        String?
-  profileVideo          String?
-  createdAt             DateTime  @default(now())
-  user                  User      @relation(fields: [userId], references: [id])
+    userId                Int       @unique
+    email                 String    @id @unique
+    pin                   String
+    firstName             String?
+    lastName              String?
+    phoneNumber           String?
+    location              String?
+    sex                   Gender?
+    dateOfBirth           DateTime?
+    meansOfIdentification String?
+    profilePicture        String?
+    profileVideo          String?
+    createdAt             DateTime  @default(now())
+    user                  User      @relation(fields: [userId], references: [id])
 }
 
 model role {
-  id          Int    @id @default(autoincrement())
-  name        String
-  description String
+    id          Int    @id @default(autoincrement())
+    name        String
+    description String
 }
 
 model professional_details {
-  id                  Int                      @id @default(autoincrement())
-  userId              Int                     @unique
-  status              ApplicantStatus          @default(NOT_LOOKING)
-  jobRole             String?                  @default(null)
-  yearsOfExperience   Int?                      @default(null)
-  professionalSummary String?                  @default(null)
-  jobPreference       workType?                 @default(REMOTE)
-  skills              String[]                 @default(null)
-  interests           String[]                 @default(null)
-  salaryRange         String?                  @default(null)
-  experienceLevel     ApplicantExperienceLevel? @default(JUNIOR)
-  highestEducation    String?                  @default(null)
-  education           education[]              @default(null)
-  allWorkExperience   work_experience[]        @default(null)
-  createdAt           DateTime?                 @default(now())
-  user                User?                    @relation(fields: [userId], references: [id])
+    id                  Int                       @id @default(autoincrement())
+    userId              Int                       @unique
+    status              ApplicantStatus           @default(NOT_LOOKING)
+    jobRole             String?                   @default(null)
+    yearsOfExperience   Int?                      @default(null)
+    professionalSummary String?                   @default(null)
+    jobPreference       workType?                 @default(REMOTE)
+    skills              String[]                  @default(null)
+    interests           String[]                  @default(null)
+    salaryRange         String?                   @default(null)
+    experienceLevel     ApplicantExperienceLevel? @default(JUNIOR)
+    highestEducation    String?                   @default(null)
+    education           education[]               @default(null)
+    allWorkExperience   work_experience[]         @default(null)
+    createdAt           DateTime?                 @default(now())
+    user                User?                     @relation(fields: [userId], references: [id])
 }
 
 model media {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  mediaType String
-  mediaPublicId String
-  mediaUrl  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+    id            Int      @id @default(autoincrement())
+    userId        Int
+    mediaType     String
+    mediaPublicId String
+    mediaUrl      String
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+    user          User     @relation(fields: [userId], references: [id])
 }
